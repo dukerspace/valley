@@ -15,4 +15,13 @@ pnpm add -filter api dayjs
 ```
 
 ## Deploy
-.env change url server
+- install standard
+  ```
+  make install
+  ```
+- .env change url server
+- copy .env to apps web & api
+- run apps
+  ```
+  make run
+  ```
