@@ -14,7 +14,6 @@ run:
 update:
 	bash ./scripts/update.sh
 
-
-.PHONY: update
-update:
+.PHONY: restart
+restart:
 	bash ./scripts/restart.sh
