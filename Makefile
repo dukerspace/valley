@@ -4,8 +4,17 @@ compose:
 
 .PHONY: install
 install:
-	bash ./install.sh
+	bash ./scripts/install.sh
 
 .PHONY: run
 run:
-	bash ./run.sh
+	bash ./scripts/run.sh
+
+.PHONY: update
+update:
+	bash ./scripts/update.sh
+
+
+.PHONY: update
+update:
+	bash ./scripts/restart.sh
