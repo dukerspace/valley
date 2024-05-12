@@ -25,7 +25,8 @@ sudo apt install -y nodejs
 npm install pm2@latest -g
 npm install -g pnpm
 
-cp ./nginx/dev.conf /etc/nginx/sites-available/default
+cp ./nginx/site.conf /etc/nginx/sites-available/default
+cp ./nginx/nginx.conf /etc/nginx/nginx.conf
 
 # Display versions of installed software
 docker --version

@@ -1,4 +1,4 @@
-# The Valley
+# The River Runs
 
 ## run dev
 - api port 3000
@@ -15,13 +15,25 @@ pnpm add -filter api dayjs
 ```
 
 ## Deploy
-- install standard
-  ```
-  make install
-  ```
 - .env change url server
-- copy .env to apps web & api
-- run apps
+- run bash install script
   ```
-  make run
+  bash ./script/install.sh
   ```
+- copy nginx
+  ```
+  cp ../nginx/default.conf:/etc/nginx/conf.d/default.conf
+  ```
+- config upload nginx
+  ```
+    http {
+    ...
+    client_max_body_size 100M;
+    ...
+    server {
+      ...
+    }
+    }
+  ```
+- run pm2
+- restart nginx
