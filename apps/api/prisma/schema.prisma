@@ -13,9 +13,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Post {
-  id          String  @id @default(uuid())
-  title       String
-  text        String
-  isPublished Boolean @default(false)
+model Admin {
+  id        String   @id @default(uuid())
+  firstName String
+  lastName  String
+  email     String
+  username  String
+  password  String
+  role      String
+  lastLogin DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+}
+
+model User {
+  id        String   @id @default(uuid())
+  firstName String
+  lastName  String
+  email     String
+  username  String?
+  password  String?
+  mobile    String?
+  failLogin Int?
+  lastLogin DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime
 }

@@ -1,5 +1,5 @@
 {
-	"name": "dukerspace/valley",
+	"name": "valley",
 	"description": "boilerplate nextjs & nestjs.",
 	"version": "0.0.0",
 	"author": {
@@ -38,7 +38,7 @@
     "prettier": "2.8.7",
     "stop-only": "3.3.1",
     "ts-jest": "28.0.8",
-    "turbo": "1.8.6",
+    "turbo": "2.0.6",
     "typescript": "5.0.3"
   },
 	"repository": {
@@ -48,5 +48,6 @@
 	"engines": {
 	  "npm": ">=9.0.0",
 	  "node": ">=20.0.0"
-	}
-  }
+	},
+  "packageManager": "pnpm@9.5.0"
+}

@@ -1,13 +1,10 @@
 {
-  "$schema": "https://turborepo.org/schema.json",
+  "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["**/.env.*"],
-  "pipeline": {
+  "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**",".next/**", "!.next/cache/**"]
-    },
-    "lint": {
-      "outputs": []
     },
     "dev": {
       "cache": false
@@ -16,9 +13,6 @@
       "cache": false
     },
     "start:prod": {
-      "cache": false
-    },
-    "db": {
       "cache": false
     }
   }
