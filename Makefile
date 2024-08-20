@@ -17,3 +17,14 @@ update:
 .PHONY: restart
 restart:
 	bash ./scripts/restart.sh
+
+.PHONY: migrate
+migrate:
+	cd apps/api && npx prisma migrate dev
+
+.PHONY: db-pull
+db-pull:
+	cd apps/api && npx prisma db pull
+.PHONY: db-gen
+db-gen:
+	cd apps/api && npx prisma generate
