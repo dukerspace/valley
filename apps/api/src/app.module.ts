@@ -1,10 +1,19 @@
-import { Module } from '@nestjs/common';
-import { AdminModule } from './admin/admin.module';
-import { UserModule } from './user/user.module';
+import { Module } from '@nestjs/common'
+import { ConfigModule } from '@nestjs/config'
+import { join } from 'path'
+import { AdminModule } from './admin/admin.module'
+import { UserModule } from './user/user.module'
 
 @Module({
-  imports: [AdminModule, UserModule],
+  imports: [
+    ConfigModule.forRoot({
+      envFilePath: join(__dirname, '../../../.env'),
+      isGlobal: true
+    }),
+    AdminModule,
+    UserModule
+  ],
   controllers: [],
-  providers: [],
+  providers: []
 })
 export class AppModule {}
