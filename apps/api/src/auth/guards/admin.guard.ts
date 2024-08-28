@@ -4,14 +4,14 @@ import { JwtService } from '@nestjs/jwt'
 import { IAdminPayload } from 'dukerspace/utils'
 import { Request } from 'express'
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator'
-import { AdminService } from '../services/admin.service'
+import { AuthService } from '../services/auth.service'
 
 @Injectable()
 export class AdminGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private reflector: Reflector,
-    private readonly adminService: AdminService
+    private readonly authService: AuthService
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -34,7 +34,7 @@ export class AdminGuard implements CanActivate {
         secret: process.env.JWT_SECRET
       })
 
-      const find = await this.adminService.findByAuth(payload.sub, payload.username)
+      const find = await this.authService.findByAuthAdmin(payload.sub, payload.username)
       if (!find) {
         throw new UnauthorizedException()
       }

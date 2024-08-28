@@ -9,10 +9,10 @@ import {
   IAutUserResponse,
   IUserPayload
 } from 'dukerspace/utils'
-import { PrismaService } from 'src/prisma/prisma.service'
+import { PrismaService } from '../../prisma/prisma.service'
 
 @Injectable()
-export class AdminService {
+export class AuthService {
   constructor(
     private prisma: PrismaService,
     private readonly jwtService: JwtService
@@ -95,16 +95,25 @@ export class AdminService {
     }
   }
 
-  async findById(id: string) {
+  // async findById(id: string) {
+  //   return this.prisma.admin.findFirst({
+  //     where: {
+  //       id: id
+  //     }
+  //   })
+  // }
+
+  async findByAuthAdmin(id: string, username: string) {
     return this.prisma.admin.findFirst({
       where: {
-        id: id
+        id: id,
+        username: username
       }
     })
   }
 
-  async findByAuth(id: string, username: string) {
-    return this.prisma.admin.findFirst({
+  async findByAuthUser(id: string, username: string) {
+    return this.prisma.user.findFirst({
       where: {
         id: id,
         username: username
