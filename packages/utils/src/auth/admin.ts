@@ -1,7 +1,7 @@
 import { IsString } from 'class-validator'
 
 export interface IAuthAdminRequest {
-  admin: string
+  username: string
   password: string
 }
 
@@ -25,7 +25,7 @@ export interface IAdminPayload {
 
 export class AdminSignIn {
   @IsString()
-  admin: string
+  username: string
 
   @IsString()
   password: string

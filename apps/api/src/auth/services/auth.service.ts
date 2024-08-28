@@ -21,7 +21,7 @@ export class AuthService {
   async validateAdmin(auth: IAuthAdminRequest): Promise<IAutAdminResponse> {
     const admin = await this.prisma.admin.findFirst({
       where: {
-        username: auth.admin
+        username: auth.username
       },
       select: {
         id: true,
@@ -94,14 +94,6 @@ export class AuthService {
       return res
     }
   }
-
-  // async findById(id: string) {
-  //   return this.prisma.admin.findFirst({
-  //     where: {
-  //       id: id
-  //     }
-  //   })
-  // }
 
   async findByAuthAdmin(id: string, username: string) {
     return this.prisma.admin.findFirst({

@@ -1,4 +1,4 @@
-import { IsEmail, IsString } from 'class-validator'
+import { IsString } from 'class-validator'
 
 export interface IAuthUserRequest {
   username: string
@@ -25,7 +25,7 @@ export interface IUserPayload {
 }
 
 export class UserSignIn {
-  @IsEmail()
+  @IsString()
   username: string
 
   @IsString()
