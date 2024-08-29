@@ -1,8 +1,8 @@
-# The Valley
+# The valley
 
 ## run dev
-- api port 3000
-- web port 8080
+- api port 3001
+- web port 3000
 ```
 pnpm run dev
 ```
@@ -37,3 +37,11 @@ pnpm add -filter api dayjs
   ```
 - run pm2
 - restart nginx
+
+
+## Cli
+
+- make install => install libs for run server
+- make run => run services
+- make restart => restart services
+- make update => update code & build restart
