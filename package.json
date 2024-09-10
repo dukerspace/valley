@@ -15,7 +15,6 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "dotenv -- turbo run dev start:dev",
-    "db": "dotenv -- turbo run db",
     "prepare": "husky install",
     "lint": "turbo run lint",
     "lint-staged": "lint-staged"
@@ -41,13 +40,18 @@
     "turbo": "2.0.6",
     "typescript": "5.0.3"
   },
-	"repository": {
-	  "type": "git",
-	  "url": "git+https://github.com/zlalabs/valley.git"
-	},
 	"engines": {
 	  "npm": ">=9.0.0",
 	  "node": ">=20.0.0"
 	},
-  "packageManager": "pnpm@9.5.0"
+  "packageManager": "pnpm@9.5.0",
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  }
 }
