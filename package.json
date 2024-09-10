@@ -16,6 +16,7 @@
     "build": "turbo run build",
     "dev": "dotenv -- turbo run dev start:dev",
     "prepare": "husky install",
+    "format": "turbo run format",
     "lint": "turbo run lint",
     "lint-staged": "lint-staged"
   },
