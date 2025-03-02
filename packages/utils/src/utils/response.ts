@@ -8,16 +8,16 @@ export interface IResponsePaginate<T> {
 
 export interface IResponseData<T> {
   success: boolean
-  data?: T | null
-  message?: T | null
+  data?: T
+  message?: T
 }
 
 export interface IErrorMessage {
-  property?: string
-  message: string
+  field?: string
+  errors: string[]
 }
 
 export interface IErrorDto {
   success: boolean
-  message?: IErrorMessage[]
+  errors?: IErrorMessage[]
 }

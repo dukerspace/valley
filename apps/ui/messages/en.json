@@ -1,0 +1,27 @@
+{
+  "common": {
+    "logIn": "Login",
+    "email": "Email",
+    "username": "Username",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "or": "Or",
+    "settings": "Settings",
+    "logout": "Log Out",
+    "profile": "Profile",
+    "category": "Category",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "update": "Update",
+    "expense": "Expense",
+    "income": "Income",
+    "confirm": "Confirm",
+    "close": "Close"
+  },
+  "account": {
+    "create": "Create Account"
+  },
+  "errors": {
+    "passwordMin": "Password min 6 characters"
+  }
+}

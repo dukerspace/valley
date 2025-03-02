@@ -1,32 +1,42 @@
 import { BadRequestException, ValidationPipe } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
-import { IErrorMessage } from 'dukerspace/utils'
+import * as cookieParser from 'cookie-parser'
 import { json, urlencoded } from 'express'
 import { AppModule } from './app.module'
-import { HttpExceptionFilter } from './http-exception'
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    cors: true
-  })
-  app.useGlobalFilters(new HttpExceptionFilter())
+  const app = await NestFactory.create(AppModule)
+  const configService = app.get(ConfigService)
+
   app.useGlobalPipes(
     new ValidationPipe({
+      forbidUnknownValues: false,
       exceptionFactory: (errors) => {
-        const result: IErrorMessage[] = errors.map((error) => ({
-          property: error.property,
-          message: error.constraints[Object.keys(error.constraints)[0]]
-        }))
-        return new BadRequestException(result)
-      },
-      stopAtFirstError: true
+        const msg = errors.map((error) => {
+          if (error.constraints) {
+            return {
+              field: error?.property,
+              message: Object.values(error.constraints)
+            }
+          }
+          return error
+        })
+
+        return new BadRequestException(msg)
+      }
     })
   )
+  app.use(cookieParser())
   app.use(json({ limit: '50mb' }))
   app.use(urlencoded({ extended: true, limit: '50mb' }))
-  app.setGlobalPrefix(process.env.API_PREFIX)
-  app.enableShutdownHooks()
-  await app.listen(process.env.API_PORT)
-  console.log('start', process.env.API_PORT, process.env.API_PREFIX)
+  app.enableCors({
+    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    credentials: true
+  })
+  app.setGlobalPrefix('api/v1')
+
+  const port = configService.get<number>('API_PORT') || 3001
+  await app.listen(port)
 }
 bootstrap()

@@ -1,0 +1,27 @@
+{
+  "common": {
+    "logIn": "เข้าสู่ระบบ",
+    "email": "อีเมล์",
+    "username": "ชื่อผู้ใช้",
+    "password": "รหัสผ่าน",
+    "confirmPassword": "ยืนยันรหัสผ่าน",
+    "or": "หรือ",
+    "logOut": "ออกจากระบบ",
+    "settings": "ตั้งค่า",
+    "profile": "Profile",
+    "category": "Category",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "update": "Update",
+    "expense": "Expense",
+    "income": "Income",
+    "confirm": "Confirm",
+    "close": "Close"
+  },
+  "account": {
+    "create": "ลงทะเบียน"
+  },
+  "errors": {
+    "passwordMin": "Password min 6 characters"
+  }
+}

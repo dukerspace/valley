@@ -1,28 +1,49 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env.*"],
+  "globalDependencies": [".env"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
-    },
-    "dev": {
-      "cache": false
-    },
-    "start:dev": {
-      "cache": false
-    },
-    "start:prod": {
-      "cache": false
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "lint": {
-      "cache": false
+      "dependsOn": ["^lint"]
     },
-    "lint-staged": {
-      "cache": false
+    "check-types": {
+      "dependsOn": ["^check-types"]
     },
-    "format": {
-      "cache": false
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "start:dev": {
+      "cache": false,
+      "persistent": true,
+      "env": [
+        "APP_ENV",
+        "API_PORT",
+        "DATABASE_URL",
+        "JWT_SECRET",
+        "JWT_EXPIRATION_TIME",
+        "NEXT_PUBLIC_URL"
+      ]
+    },
+    "start": {
+      "cache": false,
+      "persistent": true
+    },
+    "start:prod": {
+      "cache": false,
+      "persistent": true,
+      "env": [
+        "APP_ENV",
+        "API_PORT",
+        "DATABASE_URL",
+        "JWT_SECRET",
+        "JWT_EXPIRATION_TIME",
+        "NEXT_PUBLIC_URL"
+      ]
     }
   }
 }

@@ -1,55 +1,68 @@
-import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common'
-import { AdminSignIn, ERROR_MSG_TYPE, IErrorDto, UserSignIn } from 'dukerspace/utils'
+import { Body, Controller, HttpStatus, Post, Req, Res } from '@nestjs/common'
+import {
+  AuthDTO,
+  ForgetPasswordDto,
+  IAuthResponse,
+  IResponseData,
+  RefreshTokenDto,
+  ResetPasswordDto
+} from '@valley/utils'
 import { Response } from 'express'
+import { Public } from '../../common/decorators/public.decorator'
+import { IRequestWithUser } from '../interfaces/user.interface'
 import { AuthService } from '../services/auth.service'
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
-  @Post('admins')
-  async adminSignIn(@Res() res: Response, @Body() body: AdminSignIn) {
-    const validate = await this.authService.validateAdmin(body)
-    if (!validate) {
-      const errors: IErrorDto = {
-        message: [
-          {
-            property: ERROR_MSG_TYPE.SYSTEM,
-            message: 'Username or password not match.'
-          }
-        ],
-        success: false
-      }
+  @Public()
+  @Post('login')
+  async auth(@Req() req: Request, @Res() res: Response, @Body() body: AuthDTO) {
+    const data = await this.authService.validateUser(body)
 
-      return res.status(HttpStatus.UNAUTHORIZED).json(errors)
+    const result: IResponseData<IAuthResponse> = {
+      success: true,
+      data: data
     }
-
-    return res.status(HttpStatus.OK).json({
-      data: validate,
-      success: true
-    })
+    res.status(HttpStatus.OK).json(result)
   }
 
-  @Post('users')
-  async userLogin(@Res() res: Response, @Body() body: UserSignIn) {
-    const validate = await this.authService.validateUser(body)
-    if (!validate) {
-      const errors: IErrorDto = {
-        message: [
-          {
-            property: ERROR_MSG_TYPE.SYSTEM,
-            message: 'Username or password not match.'
-          }
-        ],
-        success: false
-      }
-
-      return res.status(HttpStatus.UNAUTHORIZED).json(errors)
+  @Public()
+  @Post('refresh_token')
+  async refreshToken(
+    @Req() req: IRequestWithUser,
+    @Res() res: Response,
+    @Body() body: RefreshTokenDto
+  ) {
+    const payload = await this.authService.checkRefreshToken(body.refreshToken)
+    const data = await this.authService.refreshToken(payload.sub)
+    const result: IResponseData<IAuthResponse> = {
+      success: true,
+      data: data
     }
+    res.status(HttpStatus.OK).json(result)
+  }
 
-    return res.status(HttpStatus.OK).json({
-      data: validate,
-      success: true
-    })
+  @Public()
+  @Post('password/forget')
+  async passwordForget(@Res() res: Response, @Body() body: ForgetPasswordDto) {
+    await this.authService.forgetPassword(body)
+    const result: IResponseData<string> = {
+      success: true,
+      message: 'Please check link in your email'
+    }
+    res.status(HttpStatus.OK).json(result)
+  }
+
+  @Public()
+  @Post('password/reset')
+  async passwordReset(@Res() res: Response, @Body() body: ResetPasswordDto) {
+    await this.authService.resetPassword(body)
+    const result: IResponseData<string> = {
+      success: true,
+      message: 'Password has changed'
+    }
+    res.status(HttpStatus.OK).json(result)
   }
 }

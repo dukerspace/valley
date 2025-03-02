@@ -1,115 +1,174 @@
-import { Injectable } from '@nestjs/common'
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
-import { compare } from 'bcrypt'
-import {
-  IAdminPayload,
-  IAutAdminResponse,
-  IAuthAdminRequest,
-  IAuthUserRequest,
-  IAutUserResponse,
-  IUserPayload
-} from 'dukerspace/utils'
+import { AuthDTO, ForgetPasswordDto, IAuthResponse, ResetPasswordDto } from '@valley/utils'
+import { compare, hashSync } from 'bcrypt'
+import { nanoid } from 'nanoid'
 import { PrismaService } from '../../prisma/prisma.service'
+import { IToken } from '../interfaces/token.interface'
 
 @Injectable()
 export class AuthService {
   constructor(
-    private prisma: PrismaService,
-    private readonly jwtService: JwtService
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+    private configService: ConfigService
   ) {}
 
-  async validateAdmin(auth: IAuthAdminRequest): Promise<IAutAdminResponse> {
-    const admin = await this.prisma.admin.findFirst({
-      where: {
-        username: auth.username
-      },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        password: true,
-        firstName: true,
-        lastName: true
-      }
-    })
-    if (!admin) throw new Error('Admin not found.')
-
-    const match = await compare(auth.password, admin.password)
-
-    if (!match) throw new Error('Password incorrect.')
-
-    if (admin && match) {
-      const payload: IAdminPayload = { username: admin.username, sub: admin.id }
-
-      const token = await this.jwtService.sign(payload)
-
-      const res: IAutAdminResponse = {
-        user: {
-          id: admin.id,
-          email: admin.email,
-          username: admin.username,
-          firstName: admin.firstName,
-          lastName: admin.lastName
-        },
-        accessToken: token
-      }
-      return res
-    }
-  }
-
-  async validateUser(auth: IAuthUserRequest): Promise<IAutUserResponse> {
+  async validateUser(auth: AuthDTO): Promise<IAuthResponse> {
+    console.log('----', new Date().toLocaleTimeString())
     const user = await this.prisma.user.findFirst({
       where: {
         username: auth.username
-      },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        password: true,
-        firstName: true,
-        lastName: true
       }
     })
-    if (!user) throw new Error('User not found.')
+    if (!user) throw new HttpException('User not found', HttpStatus.BAD_REQUEST)
 
     const match = await compare(auth.password, user.password)
-    if (!match) throw new Error('Password incorrect.')
+    if (!match) throw new HttpException('Password incorrect', HttpStatus.BAD_REQUEST)
 
     if (user && match) {
-      const payload: IUserPayload = { username: user.username, sub: user.id }
+      const { id, username, firstName, lastName, email, mobile } = user
 
-      const token = await this.jwtService.sign(payload)
-
-      const res: IAutUserResponse = {
+      const payload: IToken = { username: username, sub: user.id, id: user.id }
+      const token = await this.generateAccessToken(payload)
+      const refreshToken = await this.generateRefreshToken(payload)
+      console.log('date', Date.now())
+      return {
         user: {
-          id: user.id,
-          email: user.email,
-          username: user.username,
-          firstName: user.firstName,
-          lastName: user.lastName
+          id,
+          username,
+          firstName,
+          lastName,
+          email,
+          mobile
         },
-        accessToken: token
+        accessToken: token,
+        refreshToken: refreshToken
       }
-      return res
+    } else {
+      throw new Error('Error')
     }
   }
 
-  async findByAuthAdmin(id: string, username: string) {
-    return this.prisma.admin.findFirst({
+  // @todo email service
+  async forgetPassword(data: ForgetPasswordDto) {
+    const user = await this.prisma.user.findFirst({
       where: {
-        id: id,
-        username: username
+        email: data.email
+      }
+    })
+
+    if (!user) throw new HttpException('User not found', HttpStatus.BAD_REQUEST)
+
+    const forgot = await this.prisma.forgetPassword.findFirst({
+      where: {
+        userId: user.id
+      }
+    })
+
+    const token = nanoid(30)
+    if (!forgot) {
+      const data = {
+        userId: user.id,
+        token: token
+      }
+      await this.prisma.forgetPassword.create({
+        data: data
+      })
+    } else {
+      await this.prisma.forgetPassword.update({
+        where: {
+          id: forgot.id
+        },
+        data: {
+          token: token
+        }
+      })
+    }
+  }
+
+  async resetPassword(data: ResetPasswordDto) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        email: data.email
+      }
+    })
+
+    if (!user) throw new HttpException('User not found', HttpStatus.BAD_REQUEST)
+
+    const reset = await this.prisma.forgetPassword.findFirst({
+      where: {
+        userId: user.id,
+        token: data.token
+      }
+    })
+
+    if (!reset) throw new HttpException('Token not found', HttpStatus.BAD_REQUEST)
+
+    if (data.newPassword != data.confirmPassword)
+      throw new HttpException('Password not match', HttpStatus.BAD_REQUEST)
+
+    const password = hashSync(data.newPassword, 10)
+    await this.prisma.user.update({
+      where: {
+        id: user.id
+      },
+      data: {
+        password: password
+      }
+    })
+
+    await this.prisma.forgetPassword.delete({
+      where: {
+        id: reset.id
       }
     })
   }
 
-  async findByAuthUser(id: string, username: string) {
-    return this.prisma.user.findFirst({
+  async checkRefreshToken(token: string) {
+    const payload = await this.jwtService.verifyAsync<{ sub: string; username: string }>(token, {
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET')
+    })
+    return payload
+  }
+
+  async refreshToken(userId: string) {
+    const user = await this.prisma.user.findFirst({
       where: {
-        id: id,
-        username: username
+        id: userId
       }
+    })
+    if (!user) throw new HttpException('User not found', HttpStatus.BAD_REQUEST)
+
+    const { id, username, firstName, lastName, email, mobile } = user
+
+    const payload: IToken = { username: username, sub: id, id: id }
+    const token = await this.generateAccessToken(payload)
+    const refreshToken = await this.generateRefreshToken(payload)
+
+    return {
+      user: {
+        id,
+        username,
+        firstName,
+        lastName,
+        email,
+        mobile
+      },
+      accessToken: token,
+      refreshToken: refreshToken
+    }
+  }
+
+  generateAccessToken(data: IToken) {
+    return this.jwtService.signAsync(data)
+  }
+
+  generateRefreshToken(data: IToken) {
+    return this.jwtService.signAsync(data, {
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRATION_TIME')
     })
   }
 }
