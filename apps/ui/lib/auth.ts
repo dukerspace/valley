@@ -23,6 +23,11 @@ export const clearCookieAuth = async () => {
   cookie.delete(COOKIE_REFRESH_TOKEN)
 }
 
+export const getToken = async () => {
+  const cookie = await cookies()
+  return cookie.get(COOKIE_ACCESS_TOKEN!)?.value
+}
+
 export const getRefreshToken = async () => {
   const cookie = await cookies()
   return cookie.get(COOKIE_REFRESH_TOKEN!)?.value

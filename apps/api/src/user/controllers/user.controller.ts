@@ -36,7 +36,6 @@ export class UserController {
 
   @Get('me')
   async me(@Req() req: IRequestWithUser, @Res() res: Response) {
-    console.log('0-00', req.user)
     const userId = req?.user!.id
     const user = await this.userService.findById(userId)
     const { id, username, firstName, lastName, email, mobile, createdAt } = user as ViewUserDto
