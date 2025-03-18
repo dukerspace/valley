@@ -16,7 +16,6 @@ export class AuthService {
   ) {}
 
   async validateUser(auth: AuthDTO): Promise<IAuthResponse> {
-    console.log('----', new Date().toLocaleTimeString())
     const user = await this.prisma.user.findFirst({
       where: {
         username: auth.username
@@ -33,7 +32,7 @@ export class AuthService {
       const payload: IToken = { username: username, sub: user.id, id: user.id }
       const token = await this.generateAccessToken(payload)
       const refreshToken = await this.generateRefreshToken(payload)
-      console.log('date', Date.now())
+
       return {
         user: {
           id,

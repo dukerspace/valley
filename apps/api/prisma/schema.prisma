@@ -22,7 +22,6 @@ model User {
   email          String          @unique
   mobile         String?
   createdAt      DateTime        @default(now())
-  refreshToken   String?
   forgetPassword ForgetPassword?
 
   @@map("users")
