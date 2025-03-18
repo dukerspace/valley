@@ -13,7 +13,7 @@ import { AuthController } from './controllers/auth.controller'
       global: true,
       secretOrKeyProvider: () => jwtConstants.secret!,
       signOptions: {
-        expiresIn: '60s',
+        expiresIn: jwtConstants.expiresIn,
         algorithm: 'HS384'
       },
       verifyOptions: {
