@@ -3,7 +3,7 @@ import { hashSync } from 'bcrypt'
 import { Response } from 'express'
 import { Public } from '../../common/decorators/public.decorator'
 
-import { CreateUserDto, IResponseData, ViewUserDto } from '@valley/utils'
+import { CreateUserDto, IResponseData, UpdateUserDto, ViewUserDto } from '@valley/utils'
 import { IRequestWithUser } from '../../auth/interfaces/user.interface'
 import { UserService } from '../services/user.service'
 
@@ -38,11 +38,30 @@ export class UserController {
   async me(@Req() req: IRequestWithUser, @Res() res: Response) {
     const userId = req?.user!.id
     const user = await this.userService.findById(userId)
-    const { id, username, firstName, lastName, email, mobile, createdAt } = user as ViewUserDto
+    const { id, username, firstName, lastName, email, mobile, createdAt, updatedAt } =
+      user as ViewUserDto
 
     const response: IResponseData<ViewUserDto> = {
       success: true,
-      data: { id, username, firstName, lastName, email, mobile, createdAt }
+      data: { id, username, firstName, lastName, email, mobile, createdAt, updatedAt }
+    }
+    res.status(HttpStatus.OK).json(response)
+  }
+
+  @Post('me')
+  async profile(@Req() req: IRequestWithUser, @Res() res: Response, @Body() body: UpdateUserDto) {
+    const userId = req?.user!.id
+    const user = await this.userService.findById(userId)
+    if (!user) throw new HttpException('Username is not found', HttpStatus.BAD_REQUEST)
+
+    await this.userService.update(userId, body)
+
+    const { id, username, firstName, lastName, email, mobile, createdAt, updatedAt } =
+      user as ViewUserDto
+
+    const response: IResponseData<ViewUserDto> = {
+      success: true,
+      data: { id, username, firstName, lastName, email, mobile, createdAt, updatedAt }
     }
     res.status(HttpStatus.OK).json(response)
   }

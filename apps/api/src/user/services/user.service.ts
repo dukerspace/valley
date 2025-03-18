@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { User } from '@prisma/client'
-import { CreateUserDto } from '@valley/utils'
+import { CreateUserDto, UpdateUserDto } from '@valley/utils'
 import { PrismaService } from '../../prisma/prisma.service'
 
 @Injectable()
@@ -33,6 +33,15 @@ export class UserService {
     return this.prisma.user.findFirst({
       where: {
         username
+      }
+    })
+  }
+
+  update(userId: string, data: UpdateUserDto) {
+    return this.prisma.user.update({
+      data: data,
+      where: {
+        id: userId
       }
     })
   }

@@ -6,4 +6,5 @@ export class ViewUserDto {
   lastName?: string | null
   mobile?: string | null
   createdAt: Date
+  updatedAt: Date
 }
