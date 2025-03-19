@@ -1,12 +1,5 @@
 import { Body, Controller, HttpStatus, Post, Req, Res } from '@nestjs/common'
-import {
-  AuthDTO,
-  ForgetPasswordDto,
-  IAuthResponse,
-  IResponseData,
-  RefreshTokenDto,
-  ResetPasswordDto
-} from '@valley/utils'
+import { AuthDTO, IAuthResponse, IResponseData, RefreshTokenDto } from '@valley/utils'
 import { Response } from 'express'
 import { Public } from '../../common/decorators/public.decorator'
 import { IRequestWithUser } from '../interfaces/user.interface'
@@ -40,28 +33,6 @@ export class AuthController {
     const result: IResponseData<IAuthResponse> = {
       success: true,
       data: data
-    }
-    res.status(HttpStatus.OK).json(result)
-  }
-
-  @Public()
-  @Post('password/forget')
-  async passwordForget(@Res() res: Response, @Body() body: ForgetPasswordDto) {
-    await this.authService.forgetPassword(body)
-    const result: IResponseData<string> = {
-      success: true,
-      message: 'Please check link in your email'
-    }
-    res.status(HttpStatus.OK).json(result)
-  }
-
-  @Public()
-  @Post('password/reset')
-  async passwordReset(@Res() res: Response, @Body() body: ResetPasswordDto) {
-    await this.authService.resetPassword(body)
-    const result: IResponseData<string> = {
-      success: true,
-      message: 'Password has changed'
     }
     res.status(HttpStatus.OK).json(result)
   }

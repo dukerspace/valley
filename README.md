@@ -1,24 +1,41 @@
 # The valley
 
-## run dev
+- Bootstrap Nextjs and Nestjs
 
-- api port 3001
-- ui port 3000
+### Prerequisites
 
+- [Node](https://nodejs.org/en/download/)
+- [Pnpm](https://pnpm.io/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+
+## Stack Information
+
+| Concern          | Solution                                  |
+| ---------------- | ----------------------------------------- |
+| Server           | [Node](https://nodejs.org/)               |
+| Server Framework | [Nest.js](https://nestjs.com/)            |
+| Database         | [PostgreSQL](https://www.postgresql.org/) |
+| UI Framework     | [Next.js](https://nextjs.org/)            |
+| Styling          | [Tailwindcss](https://tailwindcss.com//)  |
+
+### Installation
+
+```bash
+$ git clone https://github.com/dukerspace/valley
+$ cd valley
+$ cp .env.example .env # Add your own vars here
+$ pnpm i
+$ pnpm run dev
 ```
-pnpm run dev
-```
 
-## add package project
+- By default, the app will run at ui: http://localhost:3000/
+- By default, the app will run at api http://localhost:3001/
 
-- pnpm add -filter [project-name] [package-name]
+### Development
 
-```
-pnpm add -filter api dayjs
-```
+- [Dev](./docs/dev.md)
+-
 
-## Cli
+### Deploy
 
-- make run => run services
-- make restart => restart services
-- make update => update code & build restart
+- script deploy instance [Nimman](https://github.com/dukerspace/nimman/)
