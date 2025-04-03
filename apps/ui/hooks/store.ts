@@ -19,7 +19,6 @@ export const useAppStore = create<IStoreState>()(
         set(() => ({
           isFirstTime: status
         })),
-      lang: 'th',
       user: null,
       setUser: (data: IUserInfo | null) =>
         set(() => ({

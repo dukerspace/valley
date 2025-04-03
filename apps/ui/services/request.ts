@@ -1,9 +1,13 @@
 'use server'
 
-import { COOKIE_ACCESS_TOKEN } from '@/lib/constant'
+import { COOKIE_ACCESS_TOKEN, COOKIE_LANG } from '@/lib/constant'
 import { cookies } from 'next/headers'
 
 export const getRequest = async () => {
   const cookie = await cookies()
-  return cookie.get(COOKIE_ACCESS_TOKEN!)?.value
+
+  return {
+    token: cookie.get(COOKIE_ACCESS_TOKEN!)?.value,
+    lang: cookie.get(COOKIE_LANG!)?.value
+  }
 }

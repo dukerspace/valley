@@ -1,0 +1,7 @@
+{
+  "account": {
+    "create": "Create Account",
+    "create_new_account": "Create a new account",
+    "forget_password": "Forget Password"
+  }
+}

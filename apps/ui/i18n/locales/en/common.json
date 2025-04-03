@@ -1,0 +1,32 @@
+{
+  "common": {
+    "list": "List",
+    "done": "Done",
+    "close": "Close",
+    "add": "Add",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "create": "Create",
+    "update": "Update",
+    "ok": "Ok",
+    "confirm_delete": "Confirm Delete",
+    "action": "Action",
+    "add_list": "Add List",
+    "add_member": "Add Members",
+    "price": "Price",
+    "delete": "Delete",
+    "copy": "Copy",
+    "copy_link": "Link copied",
+    "link": "Link",
+    "sign_in": "Sign In",
+    "sign_up": "Sign sign_up",
+    "username": "Username",
+    "password": "password",
+    "email": "Email",
+    "first_name": "First name",
+    "last_name": "Last name",
+    "log_out": "Logout",
+    "settings": "Settings"
+  }
+}

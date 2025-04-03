@@ -12,12 +12,12 @@ export interface IResponseData<T> {
   message?: T
 }
 
-export interface IErrorMessage {
-  field?: string
-  errors: string[]
-}
-
 export interface IErrorDto {
   success: boolean
   errors?: IErrorMessage[]
+}
+
+export interface IErrorMessage {
+  field?: string
+  message: string[]
 }

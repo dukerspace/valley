@@ -1,0 +1,12 @@
+{
+  "errors": {
+    "invalid_email": "Invalid email",
+    "password_min": "Password min {count} characters",
+    "username_min": "Username min {count} characters",
+    "first_name_min": "First name min {count} characters",
+    "lst_name_min": "Last name min {count} characters",
+    "username_validate": "Only letters (a-z, A-Z) and numbers (0-9) are allowed",
+    "password_validate": "Only English letters and symbols are allowed",
+    "password_max": "Password must be at most {count} characters long"
+  }
+}

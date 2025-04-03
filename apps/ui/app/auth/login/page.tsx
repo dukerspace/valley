@@ -41,7 +41,6 @@ export default function SignInPage() {
         {
           onSuccess: async (data) => {
             const result = data?.data
-            console.log('----', data)
             setUser(result!.user)
             setCookieAuth(result!.accessToken, result!.refreshToken)
 

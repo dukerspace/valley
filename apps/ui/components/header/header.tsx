@@ -71,7 +71,7 @@ const Header = () => {
 
                     <DropdownMenuContent>
                       <DropdownMenuItem>
-                        <Link className="w-full" href={'/accounts/profile'}>
+                        <Link className="w-full" href={'/account/profile'}>
                           <div className="flex">
                             <div className="pr-2">
                               <UserPen />
@@ -84,7 +84,7 @@ const Header = () => {
                       <DropdownMenuSeparator />
 
                       <DropdownMenuItem>
-                        <Link className="w-full" href={'/accounts/settings'}>
+                        <Link className="w-full" href={'/account/settings'}>
                           <div className="flex">
                             <div className="pr-2">
                               <Settings />
