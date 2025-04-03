@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt'
 import { AuthDTO, ForgetPasswordDto, IAuthResponse, ResetPasswordDto } from '@valley/utils'
 import { compare, hashSync } from 'bcrypt'
 import { nanoid } from 'nanoid'
+import { I18nService } from 'nestjs-i18n'
 import { PrismaService } from '../../prisma/prisma.service'
 import { IToken } from '../interfaces/token.interface'
 
@@ -12,7 +13,8 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private readonly i18n: I18nService
   ) {}
 
   async validateUser(auth: AuthDTO): Promise<IAuthResponse> {
@@ -21,7 +23,7 @@ export class AuthService {
         username: auth.username
       }
     })
-    if (!user) throw new HttpException('User not found', HttpStatus.BAD_REQUEST)
+    if (!user) throw new HttpException(this.i18n.t('error.user_not_found'), HttpStatus.BAD_REQUEST)
 
     const match = await compare(auth.password, user.password)
     if (!match) throw new HttpException('Password incorrect', HttpStatus.BAD_REQUEST)
