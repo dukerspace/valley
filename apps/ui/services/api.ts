@@ -1,6 +1,5 @@
-import { localStorageName } from '@/hooks/store'
 import { clearCookieAuth, getRefreshToken, setCookieAuth } from '@/lib/auth'
-import { IAuthResponse, IErrorDto, IResponseData } from '@valley/utils'
+import { IAuthResponse, IResponseData } from '@valley/utils'
 import axios, { AxiosError, AxiosResponse } from 'axios'
 import { getRequest } from './request'
 
@@ -8,10 +7,6 @@ const url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'
 const prefix = process.env.NEXT_PUBLIC_API_PREFIX || ''
 
 export const api = () => {
-  const storage = localStorage.getItem(localStorageName!)
-  const parse = JSON.parse(storage!)
-  const user = parse?.state?.user
-
   const baseUrl = `${url}${prefix}`
   const instance = axios.create({
     baseURL: baseUrl,
@@ -28,8 +23,8 @@ export const api = () => {
       config.headers['x-lang'] = lang
     }
 
-    if (user) {
-      const { token } = await getRequest()
+    const { token } = await getRequest()
+    if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
     return config
@@ -37,30 +32,36 @@ export const api = () => {
 
   instance.interceptors.response.use(
     (response) => {
-      return response.data
+      return response
     },
     async (error: AxiosError) => {
       const { response, config } = error
       if (response?.status === 401 || response?.status === undefined) {
         try {
           const refreshToken = await getRefreshToken()
+          if (refreshToken?.length === 0) {
+            clearCookieAuth()
+            return
+          }
           const res: AxiosResponse<IResponseData<IAuthResponse>> = await axios.post(
-            `${baseUrl}/v1/auth/refresh_oken`,
+            `${baseUrl}/v1/auth/refresh_token`,
             { refreshToken: refreshToken }
           )
 
           if (res.data.success) {
-            setCookieAuth(res.data.data!.accessToken, res.data.data!.refreshToken)
+            setCookieAuth(
+              res.data.data!.accessToken,
+              res.data.data!.refreshToken,
+              res.data.data?.user
+            )
             return axios(config!)
           }
         } catch {
-          localStorage.removeItem(localStorageName!)
           clearCookieAuth()
-          window.location.href = '/'
         }
       }
-      const res = error.response?.data as IErrorDto
-      return res
+      const res = error.response
+      throw res?.data
     }
   )
 
