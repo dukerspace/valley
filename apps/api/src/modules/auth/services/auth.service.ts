@@ -5,7 +5,7 @@ import { AuthDTO, ForgetPasswordDto, IAuthResponse, ResetPasswordDto } from '@va
 import { compare, hashSync } from 'bcrypt'
 import { nanoid } from 'nanoid'
 import { I18nService } from 'nestjs-i18n'
-import { PrismaService } from '../../prisma/prisma.service'
+import { PrismaService } from '../../../prisma/prisma.service'
 import { IToken } from '../interfaces/token.interface'
 
 @Injectable()

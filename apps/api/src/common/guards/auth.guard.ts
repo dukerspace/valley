@@ -9,7 +9,7 @@ import { Reflector } from '@nestjs/core'
 import { JwtService } from '@nestjs/jwt'
 import { Request } from 'express'
 
-import { IRequestWithUser } from 'src/auth/interfaces/user.interface'
+import { IRequestWithUser } from 'src/modules/auth/interfaces/user.interface'
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator'
 
 @Injectable()

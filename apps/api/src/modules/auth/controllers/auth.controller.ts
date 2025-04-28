@@ -1,7 +1,7 @@
 import { Body, Controller, HttpStatus, Post, Req, Res } from '@nestjs/common'
 import { AuthDTO, IAuthResponse, IResponseData, RefreshTokenDto } from '@valley/utils'
 import { Response } from 'express'
-import { Public } from '../../common/decorators/public.decorator'
+import { Public } from '../../../common/decorators/public.decorator'
 import { IRequestWithUser } from '../interfaces/user.interface'
 import { AuthService } from '../services/auth.service'
 

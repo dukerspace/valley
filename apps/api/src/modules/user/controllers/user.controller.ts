@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Post, Req, Res } from '@nestjs/common'
 import { hashSync } from 'bcrypt'
 import { Response } from 'express'
-import { Public } from '../../common/decorators/public.decorator'
+import { Public } from '../../../common/decorators/public.decorator'
 
 import { CreateUserDto, IResponseData, UpdateUserDto, ViewUserDto } from '@valley/utils'
 import { IRequestWithUser } from '../../auth/interfaces/user.interface'
