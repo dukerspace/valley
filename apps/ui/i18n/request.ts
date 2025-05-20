@@ -8,7 +8,7 @@ export default getRequestConfig(async () => {
   return {
     locale: locale,
     locales: locales,
-    messages: getMessages(locale),
+    messages: await getMessages(locale),
     timeZone: 'Asia/Bangkok'
   }
 })

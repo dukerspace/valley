@@ -1,7 +1,7 @@
 import { Footer } from '@/components/footer/footer'
 import Header from '@/components/header/header'
 import { AuthProvider } from '@/hooks/AuthProvider'
-import { ReactQueryClientProvider } from '@/hooks/reactQueryClientProvider'
+import { ReactQueryClientProvider } from '@/hooks/ReactQueryClientProvider'
 import type { Metadata } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
