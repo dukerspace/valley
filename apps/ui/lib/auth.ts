@@ -1,6 +1,6 @@
 'use server'
 
-import { IUserInfo } from '@valley/utils'
+import { IUserInfo } from '@workspace/utils'
 import { cookies } from 'next/headers'
 import { COOKIE_ACCESS_TOKEN, COOKIE_REFRESH_TOKEN, COOKIE_USER } from './constant'
 

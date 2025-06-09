@@ -3,7 +3,7 @@ import { hashSync } from 'bcrypt'
 import { Response } from 'express'
 import { Public } from '../../../common/decorators/public.decorator'
 
-import { CreateUserDto, IResponseData, UpdateUserDto, ViewUserDto } from '@valley/utils'
+import { CreateUserDto, IResponseData, UpdateUserDto, ViewUserDto } from '@workspace/utils'
 import { IRequestWithUser } from '../../auth/interfaces/user.interface'
 import { UserService } from '../services/user.service'
 

@@ -1,5 +1,5 @@
 import { IStoreState } from '@/types'
-import { IUserInfo } from '@valley/utils'
+import { IUserInfo } from '@workspace/utils'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 

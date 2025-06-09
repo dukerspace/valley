@@ -1,20 +1,22 @@
-export default function AlertError({ message }: { message: string }) {
-  return message?.length > 0 ? (
-    <div role="alert" className="alert alert-error">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-6 w-6 shrink-0 stroke-current"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-      <span>{message}</span>
-    </div>
-  ) : null
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { IErrorMessage } from '@workspace/utils'
+import { AlertCircle } from 'lucide-react'
+import { FC } from 'react'
+
+type Props = {
+  message?: string
+  errors?: IErrorMessage[]
+}
+
+export const AlertError: FC<Props> = ({ message, errors }) => {
+  return (
+    <Alert variant="destructive" className="border-red-500">
+      <AlertCircle className="h-4 w-4" />
+      <AlertDescription>
+        {message && <span>{message}</span>}
+        {errors &&
+          errors?.map((error: IErrorMessage, index) => <span key={index}>{error.message}</span>)}
+      </AlertDescription>
+    </Alert>
+  )
 }

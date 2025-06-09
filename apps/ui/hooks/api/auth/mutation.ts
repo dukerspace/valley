@@ -1,6 +1,6 @@
 import { logIn } from '@/services/auth'
 import { useMutation } from '@tanstack/react-query'
-import { IAuthRequest } from '@valley/utils'
+import { IAuthRequest } from '@workspace/utils'
 
 export const useLogin = () => {
   return useMutation({

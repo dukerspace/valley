@@ -1,4 +1,4 @@
-import { IAuthRequest, IAuthResponse, IResponseData } from '@valley/utils'
+import { IAuthRequest, IAuthResponse, IResponseData } from '@workspace/utils'
 import { api } from './api'
 
 export const logIn = async (data: IAuthRequest): Promise<IResponseData<IAuthResponse>> => {

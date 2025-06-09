@@ -1,4 +1,4 @@
-import { CreateUserDto, IResponseData, ViewUserDto } from '@valley/utils'
+import { CreateUserDto, IResponseData, ViewUserDto } from '@workspace/utils'
 import { api } from './api'
 
 export const createUser = async (data: CreateUserDto): Promise<IResponseData<ViewUserDto>> => {

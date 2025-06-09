@@ -1,4 +1,4 @@
-import { IUserInfo } from '@valley/utils'
+import { IUserInfo } from '@workspace/utils'
 
 export interface IStoreState {
   version: string

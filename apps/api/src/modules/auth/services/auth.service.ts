@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
-import { AuthDTO, ForgetPasswordDto, IAuthResponse, ResetPasswordDto } from '@valley/utils'
+import { AuthDTO, ForgetPasswordDto, IAuthResponse, ResetPasswordDto } from '@workspace/utils'
 import { compare, hashSync } from 'bcrypt'
 import { nanoid } from 'nanoid'
 import { I18nService } from 'nestjs-i18n'

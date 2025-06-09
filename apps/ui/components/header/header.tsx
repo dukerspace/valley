@@ -17,7 +17,7 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-const Header = () => {
+export const Header = () => {
   const { setUser, user } = useAppStore()
   const t = useTranslations()
   const router = useRouter()
@@ -117,5 +117,3 @@ const Header = () => {
     </div>
   )
 }
-
-export default Header

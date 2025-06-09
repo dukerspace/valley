@@ -16,7 +16,7 @@ import { PrismaModule } from './prisma/prisma.module'
     ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
     I18nModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
-        fallbackLanguage: configService.getOrThrow('fallbackLanguage'),
+        fallbackLanguage: configService.getOrThrow('fallback_language'),
         fallbacks: {
           th: 'th',
           en: 'en'

@@ -1,6 +1,6 @@
 import { createUser, getMe } from '@/services/user'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { CreateUserDto, IResponseData, ViewUserDto } from '@valley/utils'
+import { CreateUserDto, IResponseData, ViewUserDto } from '@workspace/utils'
 
 export const useCreateUser = () => {
   return useMutation({

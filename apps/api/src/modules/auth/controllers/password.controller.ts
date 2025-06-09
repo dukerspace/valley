@@ -1,5 +1,5 @@
 import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common'
-import { ForgetPasswordDto, IResponseData, ResetPasswordDto } from '@valley/utils'
+import { ForgetPasswordDto, IResponseData, ResetPasswordDto } from '@workspace/utils'
 import { Response } from 'express'
 import { Public } from '../../../common/decorators/public.decorator'
 import { AuthService } from '../services/auth.service'

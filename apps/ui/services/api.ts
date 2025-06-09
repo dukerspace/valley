@@ -1,5 +1,5 @@
 import { clearCookieAuth, getRefreshToken, setCookieAuth } from '@/lib/auth'
-import { IAuthResponse, IResponseData } from '@valley/utils'
+import { IAuthResponse, IResponseData } from '@workspace/utils'
 import axios, { AxiosError, AxiosResponse } from 'axios'
 import { getRequest } from './request'
 
