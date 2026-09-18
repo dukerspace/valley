@@ -1,0 +1,11 @@
+export const MSG_CREATE_SUCCESS = 'Created successfully'
+export const MSG_UPDATE_SUCCESS = 'Updated successfully'
+export const MSG_DELETE_SUCCESS = 'Deleted successfully'
+export const MSG_NOT_FOUND = 'Resource not found'
+export const MSG_UNAUTHORIZED = 'Unauthorized'
+export const MSG_FORBIDDEN = 'Forbidden'
+export const MSG_INVALID_CREDENTIALS = 'Invalid credentials'
+export const MSG_PASSWORD_RESET_SENT =
+  'If an account exists for that email, a reset link has been sent'
+export const MSG_PASSWORD_RESET_SUCCESS = 'Password reset successfully'
+export const MSG_PASSWORD_UPDATED = 'Password updated successfully'

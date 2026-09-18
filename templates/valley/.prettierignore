@@ -1,0 +1,12 @@
+**/dist
+**/build
+**/coverage
+**/.turbo
+**/.output
+**/.nitro
+**/node_modules
+**/generated
+apps/frontend/.react-router
+apps/frontend/.tanstack
+bun.lock
+*.tsbuildinfo

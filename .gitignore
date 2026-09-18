@@ -30,8 +30,8 @@ coverage/
 !.env.example
 !.env*.example
 
-# starter template setup marker (written after clone-time rename)
-.starter-setup
+# valley template setup marker (written after clone-time rename)
+.valley-setup
 
 # prisma
 packages/database/generated/
