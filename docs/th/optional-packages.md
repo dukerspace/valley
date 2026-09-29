@@ -3,7 +3,7 @@
 ตอนสร้างโปรเจกต์สามารถรวม `ai`, `stripe`, `email`, และ `storage` ได้ แพ็กเกจหลัก (`database`, `shared`, `ui`, `locale`) มีเสมอ
 
 ```bash
-bunx valley new my-app --packages ai,email
+bunx valley-cli new my-app --packages ai,email
 ```
 
 แพ็กเกจที่เลือกจะถูกลิงก์เข้า `apps/api` โฟลเดอร์ที่ไม่เลือกจะถูกลบ และบล็อกใน `.env.example` ที่ตรงกันจะถูกตัด ดู [อ้างอิง CLI](cli.md)

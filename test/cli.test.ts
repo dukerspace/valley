@@ -18,7 +18,7 @@ describe('cli help', () => {
     }
 
     expect(logs.join('\n')).toContain(HELP.trim())
-    expect(logs[0]).toContain('npx valley new <name> [options]')
+    expect(logs[0]).toContain('npx valley-cli new <name> [options]')
   })
 
   test('rejects unknown options and prints help', async () => {
@@ -34,7 +34,7 @@ describe('cli help', () => {
     }
 
     expect(errors.join('\n')).toContain('Unknown option: --wat')
-    expect(errors.join('\n')).toContain('npx valley new <name> [options]')
+    expect(errors.join('\n')).toContain('npx valley-cli new <name> [options]')
   })
 
   test('rejects unknown commands', async () => {

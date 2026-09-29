@@ -2,8 +2,8 @@
 /**
  * Scaffold a new project from templates/valley.
  *
- *   npx valley new <name>
- *   bunx valley new <name>
+ *   npx valley-cli new <name>
+ *   bunx valley-cli new <name>
  *   bun run valley -- new <name>
  */
 

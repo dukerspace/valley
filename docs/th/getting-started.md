@@ -10,9 +10,9 @@
 ## สร้างโปรเจกต์
 
 ```bash
-npx valley new my-app
+npx valley-cli new my-app
 # หรือ
-bunx valley new my-app
+bunx valley-cli new my-app
 ```
 
 คำสั่งนี้รวม `templates/valley` (แอปและคอนฟิก) กับแพ็กเกจจาก `packages/` และ playbook ของ CLI (`.agents`, `.skills`, `.cursor/rules`) ไปที่ `./my-app` จากนั้นรัน `git init` และ `bun install`
@@ -43,7 +43,7 @@ bun run dev
 ตอนสร้าง (ใน TTY) สามารถเลือก `ai`, `stripe`, `email`, และ `storage` ได้ หรือส่งตอนสร้างเลย:
 
 ```bash
-bunx valley new my-app --packages ai,stripe
+bunx valley-cli new my-app --packages ai,stripe
 ```
 
 ดู [CLI reference](cli.md) และ [แพ็กเกจเสริม](optional-packages.md)

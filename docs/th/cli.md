@@ -5,7 +5,7 @@ valley new <name> [options]
 valley add <pkg> [pkg...] [options]
 ```
 
-เรียกได้ด้วย `npx valley`, `bunx valley` หรือ `bun run valley --` จากรีโปนี้
+เรียกได้ด้วย `npx valley-cli`, `bunx valley-cli` หรือ `bun run valley --` จากรีโปนี้
 
 ## คำสั่ง
 
@@ -67,10 +67,10 @@ valley add ai stripe --no-install
 ## ตัวอย่าง
 
 ```bash
-npx valley new my-app
-bunx valley new my-app --packages ai,stripe
+npx valley-cli new my-app
+bunx valley-cli new my-app --packages ai,stripe
 bun run valley -- new my-app --no-install --no-git
-bunx valley new my-app --dry-run
+bunx valley-cli new my-app --dry-run
 cd my-app && valley add email storage
 ```
 

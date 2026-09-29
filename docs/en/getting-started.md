@@ -10,9 +10,9 @@ Scaffold a Bun + Turbo monorepo (Hono API, TanStack Start frontend + backoffice,
 ## Create a project
 
 ```bash
-npx valley new my-app
+npx valley-cli new my-app
 # or
-bunx valley new my-app
+bunx valley-cli new my-app
 ```
 
 That merges `templates/valley` (apps and config) with shared packages from repo-root `packages/` and CLI playbooks (`.agents`, `.skills`, `.cursor/rules`) into `./my-app`, then runs `git init` and `bun install`.
@@ -43,7 +43,7 @@ Edit `.env` before starting the API — at least set a real `JWT_SECRET` and a w
 During create (in a TTY), you can multiselect `ai`, `stripe`, `email`, and `storage`. Or pass them up front:
 
 ```bash
-bunx valley new my-app --packages ai,stripe
+bunx valley-cli new my-app --packages ai,stripe
 ```
 
 See [CLI reference](cli.md) and [Optional packages](optional-packages.md).
