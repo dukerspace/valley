@@ -6,6 +6,11 @@ import { initGit } from './helpers/git.ts'
 import { isValidProjectName } from './helpers/name.ts'
 import { renameProject, TEMPLATE_SCOPE } from './helpers/rename.ts'
 import { copyTemplate, stripScaffolding } from './helpers/template.ts'
+import {
+  applyPackageSelection,
+  OPTIONAL_PACKAGES,
+  type OptionalPackage,
+} from './packages.ts'
 import { TEMPLATE_ROOT } from './paths.ts'
 
 export type CreateProjectOptions = {
@@ -15,12 +20,15 @@ export type CreateProjectOptions = {
   noInstall?: boolean
   noGit?: boolean
   dryRun?: boolean
+  /** Optional packages to keep and link into apps/api. Default: none. */
+  packages?: readonly OptionalPackage[]
 }
 
 export type CreateProjectResult = {
   destRoot: string
   copied: string[]
   name: string
+  packages: OptionalPackage[]
 }
 
 export async function createProject(options: CreateProjectOptions): Promise<CreateProjectResult> {
@@ -31,6 +39,7 @@ export async function createProject(options: CreateProjectOptions): Promise<Crea
     noInstall = false,
     noGit = false,
     dryRun = false,
+    packages: selectedPackages = [],
   } = options
 
   const name = rawName.trim().toLowerCase()
@@ -53,18 +62,41 @@ export async function createProject(options: CreateProjectOptions): Promise<Crea
     throw new Error('Bun is required to run bun install. Install Bun: https://bun.sh')
   }
 
+  const packages = [...selectedPackages]
+
   console.log(`[create-valley] Creating ${name} from templates/${TEMPLATE_SCOPE}…`)
   const copied = copyTemplate(sourceRoot, destRoot, { dryRun })
   console.log(`[create-valley] Copied ${copied.length} file(s)${dryRun ? ' (dry run)' : ''}.`)
 
+  if (packages.length > 0) {
+    console.log(`[create-valley] Optional packages: ${packages.join(', ')}`)
+  } else {
+    console.log('[create-valley] Optional packages: (none)')
+  }
+
   if (dryRun) {
+    const wouldRemove = OPTIONAL_PACKAGES.filter((id) => !packages.includes(id))
+    if (wouldRemove.length > 0) {
+      console.log(`[create-valley] Would remove packages: ${wouldRemove.join(', ')}`)
+    }
+    if (packages.length > 0) {
+      console.log(`[create-valley] Would link into apps/api: ${packages.join(', ')}`)
+    }
     if (name !== TEMPLATE_SCOPE) console.log(`[create-valley] Would rename @${TEMPLATE_SCOPE} → @${name}`)
     if (!noGit) console.log('[create-valley] Would run: git init')
     if (!noInstall) console.log('[create-valley] Would run: bun install')
-    return { destRoot, copied, name }
+    return { destRoot, copied, name, packages }
   }
 
   stripScaffolding(destRoot)
+
+  const selection = applyPackageSelection(destRoot, packages)
+  if (selection.removed.length > 0) {
+    console.log(`[create-valley] Removed unused packages: ${selection.removed.join(', ')}`)
+  }
+  if (selection.linked.length > 0) {
+    console.log(`[create-valley] Linked into apps/api: ${selection.linked.join(', ')}`)
+  }
 
   const renamed = renameProject({ rootDir: destRoot, name })
   if (renamed.changed.length > 0) {
@@ -95,5 +127,5 @@ export async function createProject(options: CreateProjectOptions): Promise<Crea
   console.log('  cp .env.example .env')
   console.log('  bun run dev')
 
-  return { destRoot, copied, name }
+  return { destRoot, copied, name, packages }
 }

@@ -44,13 +44,20 @@ Never drop or rename in a way that breaks running readers without an explicit, a
 
 1. Confirm the data need; reuse existing fields when possible.
 2. Edit schema surgically.
-3. Create a clear, reviewable migration.
+3. Do not create or generate migration files. If a schema change requires a migration, leave the migration file creation to the user and clearly report that it remains necessary.
 4. Coordinate contract updates with `backend`.
-5. Verify with migrate status and a focused query or test.
+5. Verify the schema and focused queries or tests without creating migration files.
+
+## Migration file policy
+
+- Never create or generate migration files, including by running migration-generation commands.
+- Existing migration files may be read to understand the current schema history, but do not add a new migration file.
+- A schema change that needs a migration is incomplete until the user creates/applies that migration; state this clearly in the handoff.
 
 ## Handoffs
 
 - Services / APIs → `backend`
+- DTOs / envelopes → `shared`
 - Forms / tables for new fields → `frontend`
 - Feature sequencing → `senior-software-staff`
 - Field labels in locale files → `locale-translator`

@@ -2,10 +2,7 @@ import {
   healthResponseSchema,
   type HealthResponse,
 } from '@valley/shared'
-import {
-  healthRepository,
-  type HealthRepository,
-} from '../repositories/health.repository.ts'
+import { healthRepository } from '../repositories/health.repository.ts'
 import {
   getAppVersion,
   getRuntime,
@@ -13,11 +10,9 @@ import {
   getUptimeSeconds,
 } from '../utils/health.utils.ts'
 
-export class HealthService {
-  constructor(private readonly repository: HealthRepository = healthRepository) {}
-
+class HealthService {
   async getHealth(): Promise<{ payload: HealthResponse; ok: boolean }> {
-    const database = await this.repository.check()
+    const database = await healthRepository.check()
     const payload: HealthResponse = {
       status: database.ok ? 'ok' : 'degraded',
       service: 'api',

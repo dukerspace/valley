@@ -36,4 +36,34 @@ describe('cli help', () => {
     expect(errors.join('\n')).toContain('Unknown option: --wat')
     expect(errors.join('\n')).toContain('npx create-valley <name> [options]')
   })
+
+  test('rejects unknown --packages values', async () => {
+    const errors: string[] = []
+    const originalError = console.error
+    console.error = (...args: unknown[]) => {
+      errors.push(args.map(String).join(' '))
+    }
+    try {
+      expect(await main(['demo', '--packages', 'foo'])).toBe(1)
+    } finally {
+      console.error = originalError
+    }
+
+    expect(errors.join('\n')).toContain('Unknown package "foo"')
+  })
+
+  test('rejects --packages without a value', async () => {
+    const errors: string[] = []
+    const originalError = console.error
+    console.error = (...args: unknown[]) => {
+      errors.push(args.map(String).join(' '))
+    }
+    try {
+      expect(await main(['demo', '--packages'])).toBe(1)
+    } finally {
+      console.error = originalError
+    }
+
+    expect(errors.join('\n')).toContain('--packages requires')
+  })
 })

@@ -1,0 +1,18 @@
+---
+description: Require locale parity for every user-facing string change before work is done
+alwaysApply: true
+---
+
+# Locale parity gate
+
+When a change adds or edits **user-facing copy** (UI labels, buttons, errors, empty states, emails, notifications, API client-safe messages meant for display):
+
+1. Do **not** hardcode the string. Use keys from `packages/locale` (or the project's locale package).
+2. Read and follow `.skills/locale-translator/SKILL.md`.
+3. Add or update the key in **every** active locale (`en`, `th`, and any others in `locales` / catalogs).
+4. Preserve placeholders, ICU plurals, and brand/identifiers unchanged across locales.
+5. Before marking the task done, run the locale package parity check (e.g. `bun test` in `packages/locale` or the monorepo filter that covers it).
+
+Work with **no** user-facing copy (schema-only, internal refactors, infra) may skip translation — state `Locale: N/A` and why in the task summary.
+
+Shipping UI/API copy in only one locale is **not done**.

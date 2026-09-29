@@ -39,7 +39,7 @@ Out of scope: rewriting features without a failing check, expanding coverage int
 
 ## Done bar
 
-Done means: a focused plan was run, results are pass/fail with evidence, and any failures name the owning agent plus next action. "Seems fine" without a check is not done.
+Done means: a focused plan was run, results are pass/fail with evidence, any user-facing copy in the change has locale keys in all active locales (or a fail handed to `locale-translator`), and any failures name the owning agent plus next action. "Seems fine" without a check is not done.
 
 ## Handoffs
 

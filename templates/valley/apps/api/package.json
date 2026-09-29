@@ -11,6 +11,7 @@
     "test": "bun test"
   },
   "dependencies": {
+    "@hono/zod-validator": "^0.7.6",
     "@valley/database": "*",
     "@valley/shared": "*",
     "hono": "^4.13.8"

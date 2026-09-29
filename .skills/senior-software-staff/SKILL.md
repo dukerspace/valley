@@ -11,8 +11,8 @@ Before coding, answer or ask:
 
 1. What is the user-visible success condition?
 2. What is explicitly out of scope?
-3. Which layers change: database, backend, frontend, locale?
-4. What existing pattern should this reuse?
+3. Which layers change: database, backend, frontend, locale, seo-geo?
+4. What existing pattern should this reuse? (Start from `.skills/project-structure/SKILL.md` for monorepo placement.)
 5. What is the smallest verification that would fail if this is wrong?
 
 If two interpretations remain, present them — do not pick silently.
@@ -39,9 +39,10 @@ Default order when contracts or data change:
 2. `backend` — API / services consuming the new shape
 3. `frontend` — UI against the contract
 4. `locale-translator` — keys for new copy
-5. `tester` — focused verification / regression evidence
+5. `seo-geo` — metadata, structured data, crawl, AI-citation readiness (when in scope)
+6. `tester` — focused verification / regression evidence
 
-Skip layers that are untouched. For single-layer work, go straight to that specialist (or implement yourself if trivially small). Hand non-trivial verification to `tester`.
+Skip layers that are untouched. For single-layer work, go straight to that specialist (or implement yourself if trivially small). Hand non-trivial verification to `tester`. Insert `seo-geo` whenever discoverability, ranking, or AI citation is part of the request.
 
 ## Review checklist
 
@@ -51,6 +52,7 @@ Skip layers that are untouched. For single-layer work, go straight to that speci
 - [ ] Trust boundaries validated; no secrets in diffs
 - [ ] Specialists have clear acceptance criteria if delegated
 - [ ] Verification step is named and was (or will be) run
+- [ ] Locale parity verified for any user-facing copy, or `Locale: N/A` with reason
 
 ## Verification requirement
 
