@@ -1,29 +1,31 @@
 # อ้างอิง CLI
 
 ```text
-create-valley <name> [options]
+valley new <name> [options]
+valley add <pkg> [pkg...] [options]
 ```
 
-เรียกได้ด้วย `npx create-valley`, `bunx create-valley` หรือ `bun run create-valley` จากรีโปนี้
+เรียกได้ด้วย `npx valley`, `bunx valley` หรือ `bun run valley --` จากรีโปนี้
 
-## อาร์กิวเมนต์
+## คำสั่ง
 
-| อาร์กิวเมนต์ | คำอธิบาย |
+| คำสั่ง | คำอธิบาย |
 | --- | --- |
-| `name` | โฟลเดอร์ที่จะสร้าง ต้องเป็น npm slug ตัวพิมพ์เล็ก (เช่น `my-app`) |
+| `new <name>` | สร้างโฟลเดอร์โปรเจกต์ ต้องเป็น npm slug ตัวพิมพ์เล็ก (เช่น `my-app`) |
+| `add <pkg...>` | เพิ่มแพ็กเกจเสริม (`ai`, `stripe`, `email`, `storage`) ในโฟลเดอร์โปรเจกต์**ปัจจุบัน** |
 
 ## ตัวเลือก
 
 | แฟล็ก | คำอธิบาย |
 | --- | --- |
-| `--packages <list>` | แพ็กเกจเสริมที่จะรวม (`ai`, `stripe`, `email`, `storage`) คั่นด้วยจุลภาค ข้ามตัวเลือกแบบโต้ตอบ |
+| `--packages <list>` | (`new`) แพ็กเกจเสริมที่จะรวม คั่นด้วยจุลภาค ข้ามตัวเลือกแบบโต้ตอบ |
 | `--no-install` | ข้าม `bun install` |
-| `--no-git` | ข้าม `git init` |
+| `--no-git` | (`new`) ข้าม `git init` |
 | `--dry-run` | แสดงการกระทำโดยไม่เขียนไฟล์ |
 | `-v`, `--version` | แสดงเวอร์ชัน CLI |
 | `-h`, `--help` | แสดงความช่วยเหลือ |
 
-## การเลือกแพ็กเกจ
+## การเลือกแพ็กเกจ (`new`)
 
 รหัสที่รองรับ: `ai`, `stripe`, `email`, `storage`
 
@@ -36,29 +38,50 @@ create-valley <name> [options]
 
 แพ็กเกจหลัก (`database`, `shared`, `ui`, `locale`) มีเสมอ โฟลเดอร์แพ็กเกจเสริมที่ไม่ได้เลือกจะถูกลบ และบล็อกใน `.env.example` ที่ตรงกันจะถูกตัดออก แพ็กเกจที่เลือกจะถูกลิงก์เข้า `apps/api`
 
-## สิ่งที่ scaffolding ทำ
+## เพิ่มแพ็กเกจทีหลัง (`add`)
+
+รันภายในโปรเจกต์ valley ที่มีอยู่แล้ว:
+
+```bash
+cd my-app
+valley add ai
+valley add ai stripe --no-install
+```
+
+| โหมด | พฤติกรรม |
+| --- | --- |
+| `valley add ai stripe` | เพิ่มแพ็กเกจเหล่านั้น (คั่นด้วยช่องว่างหรือจุลภาค) |
+| `valley add` + TTY | เลือกหลายรายการแบบโต้ตอบ (ซ่อนแพ็กเกจที่มีอยู่แล้ว) |
+| `valley add` + non-TTY | ผิดพลาด — ต้องระบุรหัสแพ็กเกจ |
+
+แต่ละแพ็กเกจจะถูกคัดลอกจากแหล่งแพ็กเกจของ valley เปลี่ยนสโคป `@valley` เป็นของโปรเจกต์ ลิงก์เข้า `apps/api` เติมบล็อก `.env.example` ที่ขาด และรัน `bun install` (ยกเว้น `--no-install`) จะล้มเหลวถ้า `packages/<id>` มีอยู่แล้ว
+
+## สิ่งที่ scaffolding ทำ (`new`)
 
 1. คัดลอก `templates/valley` ไปที่ `./<name>` (ข้าม `node_modules`, แคชบิลด์, ไฟล์ `.env` ยกเว้น `.env.example`)
-2. ใช้การเลือกแพ็กเกจเสริม
-3. เปลี่ยนสโคป `@valley` เป็น `@<name>`
-4. (ถ้าเปิด) `git init` และ `bun install`
+2. คัดลอกแพ็กเกจจาก `packages/` และ playbook ของ CLI (`.agents`, `.skills`, `.cursor/rules`)
+3. ใช้การเลือกแพ็กเกจเสริม
+4. เปลี่ยนสโคป `@valley` เป็น `@<name>`
+5. (ถ้าเปิด) `git init` และ `bun install`
 
 ## ตัวอย่าง
 
 ```bash
-npx create-valley my-app
-bunx create-valley my-app --packages ai,stripe
-bun run create-valley my-app --no-install --no-git
-bunx create-valley my-app --dry-run
+npx valley new my-app
+bunx valley new my-app --packages ai,stripe
+bun run valley -- new my-app --no-install --no-git
+bunx valley new my-app --dry-run
+cd my-app && valley add email storage
 ```
 
 ## พัฒนา CLI บนเครื่อง
 
-จากรีโป create-valley:
+จากรีโปนี้:
 
 ```bash
-bun run create-valley my-app
+bun run valley -- new my-app
 # หรือ
 bun link
-create-valley my-app
+valley new my-app
+valley add ai
 ```

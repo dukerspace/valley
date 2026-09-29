@@ -41,4 +41,4 @@ In development, password-reset emails are logged to the API stdout (no SMTP).
 
 ## Docs
 
-Full bilingual guides: [create-valley docs](https://github.com/dukerspace/valley/tree/main/docs)
+Full bilingual guides: [valley docs](https://github.com/dukerspace/valley/tree/main/docs)

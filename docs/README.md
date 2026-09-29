@@ -1,6 +1,6 @@
 # Documentation
 
-Usage guides for **create-valley** (CLI) and the generated **valley** app.
+Usage guides for **valley** (CLI) and the generated **valley** app.
 
 ## Languages
 

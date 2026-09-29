@@ -1,29 +1,31 @@
 # CLI reference
 
 ```text
-create-valley <name> [options]
+valley new <name> [options]
+valley add <pkg> [pkg...] [options]
 ```
 
-Also available as `npx create-valley`, `bunx create-valley`, or `bun run create-valley` from this repository.
+Also available as `npx valley`, `bunx valley`, or `bun run valley --` from this repository.
 
-## Arguments
+## Commands
 
-| Argument | Description |
+| Command | Description |
 | --- | --- |
-| `name` | Directory to create. Must be a lowercase npm slug (for example `my-app`). |
+| `new <name>` | Scaffold a project directory. Must be a lowercase npm slug (for example `my-app`). |
+| `add <pkg...>` | Add optional packages (`ai`, `stripe`, `email`, `storage`) to the **current** project directory. |
 
 ## Options
 
 | Flag | Description |
 | --- | --- |
-| `--packages <list>` | Optional packages to include (`ai`, `stripe`, `email`, `storage`). Comma-separated. Skips the interactive picker. |
+| `--packages <list>` | (`new`) Optional packages to include. Comma-separated. Skips the interactive picker. |
 | `--no-install` | Skip `bun install` |
-| `--no-git` | Skip `git init` |
+| `--no-git` | (`new`) Skip `git init` |
 | `--dry-run` | Print actions without writing files |
 | `-v`, `--version` | Show CLI version |
 | `-h`, `--help` | Show help |
 
-## Package selection
+## Package selection (`new`)
 
 Valid optional ids: `ai`, `stripe`, `email`, `storage`.
 
@@ -36,29 +38,50 @@ Valid optional ids: `ai`, `stripe`, `email`, `storage`.
 
 Core packages (`database`, `shared`, `ui`, `locale`) are always included. Unselected optional package directories are removed from the new project, and matching blocks are pruned from `.env.example`. Selected packages are linked into `apps/api`.
 
-## What scaffolding does
+## Adding packages later (`add`)
+
+Run inside an existing valley project:
+
+```bash
+cd my-app
+valley add ai
+valley add ai stripe --no-install
+```
+
+| Mode | Behavior |
+| --- | --- |
+| `valley add ai stripe` | Add those packages (space- or comma-separated). |
+| `valley add` + TTY | Interactive multiselect (already-installed packages hidden). |
+| `valley add` + non-TTY | Error — package ids required. |
+
+For each package, the CLI copies from the valley package sources, renames `@valley` to the project scope, links into `apps/api`, appends missing `.env.example` sections, and runs `bun install` (unless `--no-install`). Fails if `packages/<id>` already exists.
+
+## What scaffolding does (`new`)
 
 1. Copy `templates/valley` into `./<name>` (skips `node_modules`, build caches, `.env` files except `.env.example`).
-2. Apply optional package selection.
-3. Rename the `@valley` scope to `@<name>`.
-4. Optionally `git init` and `bun install`.
+2. Copy shared packages from repo-root `packages/` and CLI playbooks (`.agents`, `.skills`, `.cursor/rules`).
+3. Apply optional package selection.
+4. Rename the `@valley` scope to `@<name>`.
+5. Optionally `git init` and `bun install`.
 
 ## Examples
 
 ```bash
-npx create-valley my-app
-bunx create-valley my-app --packages ai,stripe
-bun run create-valley my-app --no-install --no-git
-bunx create-valley my-app --dry-run
+npx valley new my-app
+bunx valley new my-app --packages ai,stripe
+bun run valley -- new my-app --no-install --no-git
+bunx valley new my-app --dry-run
+cd my-app && valley add email storage
 ```
 
 ## Local development of the CLI
 
-From the create-valley repository:
+From this repository:
 
 ```bash
-bun run create-valley my-app
+bun run valley -- new my-app
 # or
 bun link
-create-valley my-app
+valley new my-app
+valley add ai
 ```

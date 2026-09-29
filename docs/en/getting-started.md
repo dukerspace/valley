@@ -1,6 +1,6 @@
 # Getting started
 
-Scaffold a Bun + Turbo monorepo (Hono API, TanStack Start frontend + backoffice, Prisma) with **create-valley**.
+Scaffold a Bun + Turbo monorepo (Hono API, TanStack Start frontend + backoffice, Prisma) with **valley**.
 
 ## Requirements
 
@@ -10,12 +10,12 @@ Scaffold a Bun + Turbo monorepo (Hono API, TanStack Start frontend + backoffice,
 ## Create a project
 
 ```bash
-npx create-valley my-app
+npx valley new my-app
 # or
-bunx create-valley my-app
+bunx valley new my-app
 ```
 
-That copies the valley template into `./my-app`, runs `git init`, and `bun install`.
+That merges `templates/valley` (apps and config) with shared packages from repo-root `packages/` and CLI playbooks (`.agents`, `.skills`, `.cursor/rules`) into `./my-app`, then runs `git init` and `bun install`.
 
 The project name must be a lowercase npm slug (for example `my-app`).
 
@@ -43,7 +43,7 @@ Edit `.env` before starting the API — at least set a real `JWT_SECRET` and a w
 During create (in a TTY), you can multiselect `ai`, `stripe`, `email`, and `storage`. Or pass them up front:
 
 ```bash
-bunx create-valley my-app --packages ai,stripe
+bunx valley new my-app --packages ai,stripe
 ```
 
 See [CLI reference](cli.md) and [Optional packages](optional-packages.md).

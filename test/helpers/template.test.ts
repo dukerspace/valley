@@ -1,9 +1,18 @@
 import { afterEach, describe, expect, test } from 'bun:test'
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { copyTemplate, stripScaffolding } from '../../src/helpers/template.ts'
-import { TEMPLATE_ROOT } from '../../src/paths.ts'
+import { copyCliPlaybooks, copySharedPackages, copyTemplate, stripScaffolding } from '../../src/helpers/template.ts'
+import { PACKAGE_ROOT, SHARED_PACKAGES_ROOT, TEMPLATE_ROOT } from '../../src/paths.ts'
 
 const temps: string[] = []
 
@@ -21,8 +30,6 @@ function makeTemplateFixture(): string {
   mkdirSync(join(dir, 'apps', 'api'), { recursive: true })
   mkdirSync(join(dir, 'node_modules', '@valley'), { recursive: true })
   mkdirSync(join(dir, '.git'), { recursive: true })
-  mkdirSync(join(dir, '.skills', 'backend'), { recursive: true })
-  mkdirSync(join(dir, '.agents'), { recursive: true })
 
   writeFileSync(
     join(dir, 'package.json'),
@@ -46,8 +53,7 @@ function makeTemplateFixture(): string {
   writeFileSync(join(dir, '.git', 'config'), '[core]\n')
   writeFileSync(join(dir, '.env'), 'SECRET=1\n')
   writeFileSync(join(dir, '.env.example'), 'SECRET=\n')
-  writeFileSync(join(dir, '.skills', 'backend', 'SKILL.md'), '# Backend skill\n')
-  writeFileSync(join(dir, '.agents', 'backend.md'), '# Backend agent\n')
+  writeFileSync(join(dir, 'AGENTS.md'), '# Agents\n')
 
   return dir
 }
@@ -71,6 +77,16 @@ describe('TEMPLATE_ROOT', () => {
   })
 })
 
+describe('SHARED_PACKAGES_ROOT', () => {
+  test('contains the eight valley workspace packages', () => {
+    expect(SHARED_PACKAGES_ROOT.replace(/\\/g, '/')).toMatch(/packages$/)
+    expect(existsSync(SHARED_PACKAGES_ROOT)).toBe(true)
+    for (const id of ['ai', 'database', 'email', 'locale', 'shared', 'storage', 'stripe', 'ui']) {
+      expect(existsSync(join(SHARED_PACKAGES_ROOT, id, 'package.json'))).toBe(true)
+    }
+  })
+})
+
 describe('copyTemplate', () => {
   test('copies files and skips node_modules, .git, and local env', () => {
     const src = makeTemplateFixture()
@@ -82,16 +98,107 @@ describe('copyTemplate', () => {
     expect(copied.some((f) => f.includes('package.json'))).toBe(true)
     expect(existsSync(join(dest, 'package.json'))).toBe(true)
     expect(existsSync(join(dest, '.env.example'))).toBe(true)
-    expect(existsSync(join(dest, '.skills', 'backend', 'SKILL.md'))).toBe(true)
-    expect(existsSync(join(dest, '.agents', 'backend.md'))).toBe(true)
+    expect(existsSync(join(dest, 'AGENTS.md'))).toBe(true)
     expect(existsSync(join(dest, 'node_modules'))).toBe(false)
     expect(existsSync(join(dest, '.git'))).toBe(false)
     expect(existsSync(join(dest, '.env'))).toBe(false)
   })
 
-  test('TEMPLATE_ROOT includes .skills and .agents', () => {
-    expect(existsSync(join(TEMPLATE_ROOT, '.skills'))).toBe(true)
-    expect(existsSync(join(TEMPLATE_ROOT, '.agents'))).toBe(true)
+  test('skips top-level packages, .agents, .skills, and .cursor', () => {
+    const src = makeTemplateFixture()
+    const pkgs = mkdtempSync(join(tmpdir(), 'valley-pkgs-'))
+    temps.push(pkgs)
+    mkdirSync(join(pkgs, 'shared', 'src'), { recursive: true })
+    writeFileSync(join(pkgs, 'shared', 'package.json'), '{"name":"@valley/shared"}\n')
+    writeFileSync(join(pkgs, 'shared', 'src', 'index.ts'), 'export {}\n')
+    symlinkSync(pkgs, join(src, 'packages'))
+    mkdirSync(join(src, '.agents'), { recursive: true })
+    writeFileSync(join(src, '.agents', 'skip.md'), '# skip\n')
+    mkdirSync(join(src, '.skills', 'skip'), { recursive: true })
+    writeFileSync(join(src, '.skills', 'skip', 'SKILL.md'), '# skip\n')
+    mkdirSync(join(src, '.cursor', 'rules'), { recursive: true })
+    writeFileSync(join(src, '.cursor', 'rules', 'skip.mdc'), '# skip\n')
+
+    const destParent = mkdtempSync(join(tmpdir(), 'valley-create-dest-'))
+    temps.push(destParent)
+    const dest = join(destParent, 'my-app')
+
+    const copied = copyTemplate(src, dest)
+    expect(copied.some((f) => f.startsWith('packages'))).toBe(false)
+    expect(copied.some((f) => f.startsWith('.agents'))).toBe(false)
+    expect(copied.some((f) => f.startsWith('.skills'))).toBe(false)
+    expect(copied.some((f) => f.startsWith('.cursor'))).toBe(false)
+    expect(existsSync(join(dest, 'packages'))).toBe(false)
+    expect(existsSync(join(dest, '.agents'))).toBe(false)
+  })
+
+  test('TEMPLATE_ROOT has apps and AGENTS.md; packages live at SHARED_PACKAGES_ROOT', () => {
+    expect(existsSync(join(TEMPLATE_ROOT, 'apps', 'api', 'package.json'))).toBe(true)
+    expect(existsSync(join(TEMPLATE_ROOT, 'AGENTS.md'))).toBe(true)
+    expect(existsSync(join(SHARED_PACKAGES_ROOT, 'shared', 'package.json'))).toBe(true)
+  })
+})
+
+describe('copySharedPackages', () => {
+  test('copies packages into destRoot/packages', () => {
+    const pkgs = mkdtempSync(join(tmpdir(), 'valley-pkgs-'))
+    temps.push(pkgs)
+    mkdirSync(join(pkgs, 'shared', 'src'), { recursive: true })
+    mkdirSync(join(pkgs, 'ai', 'src'), { recursive: true })
+    writeFileSync(join(pkgs, 'shared', 'package.json'), '{"name":"@valley/shared"}\n')
+    writeFileSync(join(pkgs, 'shared', 'src', 'index.ts'), 'export {}\n')
+    writeFileSync(join(pkgs, 'ai', 'package.json'), '{"name":"@valley/ai"}\n')
+    writeFileSync(join(pkgs, 'ai', 'src', 'index.ts'), 'export {}\n')
+    mkdirSync(join(pkgs, 'node_modules'), { recursive: true })
+    writeFileSync(join(pkgs, 'node_modules', 'x'), 'skip\n')
+
+    const destParent = mkdtempSync(join(tmpdir(), 'valley-create-dest-'))
+    temps.push(destParent)
+    const dest = join(destParent, 'my-app')
+
+    const copied = copySharedPackages(pkgs, dest)
+    expect(copied.some((f) => f.replace(/\\/g, '/').startsWith('packages/'))).toBe(true)
+    expect(existsSync(join(dest, 'packages', 'shared', 'package.json'))).toBe(true)
+    expect(existsSync(join(dest, 'packages', 'ai', 'src', 'index.ts'))).toBe(true)
+    expect(existsSync(join(dest, 'packages', 'node_modules'))).toBe(false)
+    expect(readdirSync(join(dest, 'packages')).sort()).toEqual(['ai', 'shared'])
+  })
+
+  test('throws when packages root is missing', () => {
+    const destParent = mkdtempSync(join(tmpdir(), 'valley-create-dest-'))
+    temps.push(destParent)
+    expect(() => copySharedPackages(join(destParent, 'missing'), join(destParent, 'app'))).toThrow(
+      /Shared packages not found/
+    )
+  })
+})
+
+describe('copyCliPlaybooks', () => {
+  test('copies .agents, .skills, and .cursor/rules into dest', () => {
+    const root = mkdtempSync(join(tmpdir(), 'valley-cli-root-'))
+    temps.push(root)
+    mkdirSync(join(root, '.agents'), { recursive: true })
+    mkdirSync(join(root, '.skills', 'backend'), { recursive: true })
+    mkdirSync(join(root, '.cursor', 'rules'), { recursive: true })
+    writeFileSync(join(root, '.agents', 'backend.md'), '# agent\n')
+    writeFileSync(join(root, '.skills', 'backend', 'SKILL.md'), '# skill\n')
+    writeFileSync(join(root, '.cursor', 'rules', 'locale-parity.mdc'), '# rule\n')
+
+    const destParent = mkdtempSync(join(tmpdir(), 'valley-create-dest-'))
+    temps.push(destParent)
+    const dest = join(destParent, 'my-app')
+
+    const copied = copyCliPlaybooks(root, dest)
+    expect(copied.some((f) => f.replace(/\\/g, '/').startsWith('.agents/'))).toBe(true)
+    expect(existsSync(join(dest, '.agents', 'backend.md'))).toBe(true)
+    expect(existsSync(join(dest, '.skills', 'backend', 'SKILL.md'))).toBe(true)
+    expect(existsSync(join(dest, '.cursor', 'rules', 'locale-parity.mdc'))).toBe(true)
+  })
+
+  test('PACKAGE_ROOT includes the shipped playbook paths', () => {
+    expect(existsSync(join(PACKAGE_ROOT, '.agents', 'backend.md'))).toBe(true)
+    expect(existsSync(join(PACKAGE_ROOT, '.skills', 'backend', 'SKILL.md'))).toBe(true)
+    expect(existsSync(join(PACKAGE_ROOT, '.cursor', 'rules', 'locale-parity.mdc'))).toBe(true)
   })
 })
 

@@ -1,18 +1,20 @@
 {
-  "name": "create-valley",
+  "name": "valley",
   "version": "0.1.0",
   "description": "Scaffold a Bun + Turbo full-stack app (Hono, TanStack Start, Prisma)",
   "author": "dukerspace",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "create-valley": "./src/index.ts"
+    "valley": "./src/index.ts"
   },
   "files": [
     "src",
+    "packages",
+    ".agents",
+    ".skills",
+    ".cursor/rules",
     "templates",
-    "templates/valley/.skills",
-    "templates/valley/.agents",
     "templates/valley/.env.example",
     "templates/valley/.gitignore",
     "templates/valley/.editorconfig",
@@ -25,7 +27,7 @@
   },
   "scripts": {
     "start": "bun src/index.ts",
-    "create-valley": "bun src/index.ts",
+    "valley": "bun src/index.ts",
     "typecheck": "tsc --noEmit",
     "test": "bun test ./test",
     "format": "prettier --write .",

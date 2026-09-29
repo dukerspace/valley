@@ -2,6 +2,8 @@
 
 Generated apps are a Bun + Turbo monorepo.
 
+In the valley CLI repo, apps live under `templates/valley/`, shared packages live at repo-root `packages/`, and agent playbooks live at repo-root `.agents` / `.skills` / `.cursor/rules`; `valley new` merges all of these into the new project.
+
 ## Workspace map
 
 | Path | Role |
