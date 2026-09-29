@@ -23,10 +23,10 @@ Full usage guides (English + Thai): [docs/README.md](docs/README.md)
 To try the scaffolder against the local template:
 
 ```bash
-bun run create-valley my-app
+bun run valley -- new my-app
 # or
 bun link
-create-valley my-app
+valley new my-app
 ```
 
 ## Author

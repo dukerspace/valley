@@ -3,10 +3,17 @@
 At create time you can include `ai`, `stripe`, `email`, and `storage`. Core packages (`database`, `shared`, `ui`, `locale`) are always present.
 
 ```bash
-bunx create-valley my-app --packages ai,email
+bunx valley new my-app --packages ai,email
 ```
 
 Selected packages are linked into `apps/api`. Unselected directories are removed and matching `.env.example` blocks are pruned. See [CLI reference](cli.md).
+
+To add packages later inside an existing project:
+
+```bash
+cd my-app
+valley add ai stripe
+```
 
 ## `@valley/ai` (or `@<name>/ai`)
 

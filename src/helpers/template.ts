@@ -42,6 +42,7 @@ export const SCAFFOLD_FILES = [
   'src/version.ts',
   'src/help.ts',
   'src/create.ts',
+  'src/add.ts',
   'src/paths.ts',
   'src/helpers/name.ts',
   'src/helpers/template.ts',
@@ -52,6 +53,7 @@ export const SCAFFOLD_FILES = [
   'test/help.test.ts',
   'test/cli.test.ts',
   'test/create.test.ts',
+  'test/add.test.ts',
   'test/helpers/name.test.ts',
   'test/helpers/template.test.ts',
   'test/helpers/rename.test.ts',
@@ -65,12 +67,16 @@ export type StripScaffoldingOptions = {
   dryRun?: boolean
 }
 
-export function copyTemplate(
+function shouldSkipEnvFile(entry: string): boolean {
+  return entry === '.env' || (/^\.env\./.test(entry) && !entry.endsWith('.example'))
+}
+
+function walkAndCopy(
   sourceRoot: string,
   destRoot: string,
-  opts: CopyTemplateOptions = {}
+  opts: { dryRun: boolean; destRelPrefix?: string; skipTopLevel?: ReadonlySet<string> }
 ): string[] {
-  const { dryRun = false } = opts
+  const { dryRun, destRelPrefix = '', skipTopLevel } = opts
   const destName = destRoot.split(/[/\\]/).filter(Boolean).pop()
   const copied: string[] = []
 
@@ -86,6 +92,7 @@ export function copyTemplate(
       if (entry === '.valley-setup') continue
       // Avoid recursing into the destination when scaffolding inside the template tree.
       if (dir === sourceRoot && entry === destName) continue
+      if (dir === sourceRoot && skipTopLevel?.has(entry)) continue
 
       const full = join(dir, entry)
       let st
@@ -95,8 +102,12 @@ export function copyTemplate(
         continue
       }
 
-      const rel = relative(sourceRoot, full)
-      if (SCAFFOLD_FILES.includes(rel.replace(/\\/g, '/'))) continue
+      const relFromSource = relative(sourceRoot, full)
+      const rel = destRelPrefix
+        ? join(destRelPrefix, relFromSource).replace(/\\/g, '/')
+        : relFromSource.replace(/\\/g, '/')
+
+      if (!destRelPrefix && SCAFFOLD_FILES.includes(rel)) continue
 
       if (st.isDirectory()) {
         walk(full)
@@ -104,10 +115,7 @@ export function copyTemplate(
       }
       if (!st.isFile()) continue
 
-      // Skip local env files; keep .env.example
-      if (entry === '.env' || (/^\.env\./.test(entry) && !entry.endsWith('.example'))) {
-        continue
-      }
+      if (shouldSkipEnvFile(entry)) continue
 
       copied.push(rel)
       if (!dryRun) {
@@ -122,6 +130,92 @@ export function copyTemplate(
     mkdirSync(destRoot, { recursive: true })
   }
   walk(sourceRoot)
+  return copied
+}
+
+export function copyTemplate(
+  sourceRoot: string,
+  destRoot: string,
+  opts: CopyTemplateOptions = {}
+): string[] {
+  const { dryRun = false } = opts
+  // Packages and playbooks come from the CLI repo root; skip template copies/symlinks.
+  return walkAndCopy(sourceRoot, destRoot, {
+    dryRun,
+    skipTopLevel: new Set(['packages', '.agents', '.skills', '.cursor']),
+  })
+}
+
+export type CopySharedPackagesOptions = {
+  dryRun?: boolean
+}
+
+/** Copy workspace packages from the CLI repo into destRoot/packages. */
+export function copySharedPackages(
+  packagesRoot: string,
+  destRoot: string,
+  opts: CopySharedPackagesOptions = {}
+): string[] {
+  const { dryRun = false } = opts
+  if (!existsSync(packagesRoot)) {
+    throw new Error(`Shared packages not found at ${packagesRoot}`)
+  }
+  return walkAndCopy(packagesRoot, destRoot, {
+    dryRun,
+    destRelPrefix: 'packages',
+  })
+}
+
+export type CopySharedPackageOptions = {
+  dryRun?: boolean
+}
+
+/** Copy a single workspace package into destRoot/packages/<id>. */
+export function copySharedPackage(
+  packagesRoot: string,
+  destRoot: string,
+  id: string,
+  opts: CopySharedPackageOptions = {}
+): string[] {
+  const { dryRun = false } = opts
+  const src = join(packagesRoot, id)
+  if (!existsSync(src)) {
+    throw new Error(`Shared package not found at ${src}`)
+  }
+  return walkAndCopy(src, destRoot, {
+    dryRun,
+    destRelPrefix: join('packages', id).replace(/\\/g, '/'),
+  })
+}
+
+export type CopyCliPlaybooksOptions = {
+  dryRun?: boolean
+  /** Relative paths under playbooksRoot to copy (default: .agents, .skills, .cursor/rules). */
+  paths?: readonly string[]
+}
+
+/** Copy agent/skill playbooks and cursor rules from the CLI repo into the new project. */
+export function copyCliPlaybooks(
+  playbooksRoot: string,
+  destRoot: string,
+  opts: CopyCliPlaybooksOptions = {}
+): string[] {
+  const { dryRun = false, paths = ['.agents', '.skills', '.cursor/rules'] } = opts
+  const copied: string[] = []
+
+  for (const rel of paths) {
+    const src = join(playbooksRoot, rel)
+    if (!existsSync(src)) {
+      throw new Error(`CLI playbook path not found at ${src}`)
+    }
+    copied.push(
+      ...walkAndCopy(src, destRoot, {
+        dryRun,
+        destRelPrefix: rel.replace(/\\/g, '/'),
+      })
+    )
+  }
+
   return copied
 }
 

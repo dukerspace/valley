@@ -1,6 +1,6 @@
 # เริ่มต้นใช้งาน
 
-สร้าง Bun + Turbo monorepo (Hono API, TanStack Start frontend + backoffice, Prisma) ด้วย **create-valley**
+สร้าง Bun + Turbo monorepo (Hono API, TanStack Start frontend + backoffice, Prisma) ด้วย **valley**
 
 ## ความต้องการของระบบ
 
@@ -10,12 +10,12 @@
 ## สร้างโปรเจกต์
 
 ```bash
-npx create-valley my-app
+npx valley new my-app
 # หรือ
-bunx create-valley my-app
+bunx valley new my-app
 ```
 
-คำสั่งนี้คัดลอกเทมเพลต valley ไปที่ `./my-app` จากนั้นรัน `git init` และ `bun install`
+คำสั่งนี้รวม `templates/valley` (แอปและคอนฟิก) กับแพ็กเกจจาก `packages/` และ playbook ของ CLI (`.agents`, `.skills`, `.cursor/rules`) ไปที่ `./my-app` จากนั้นรัน `git init` และ `bun install`
 
 ชื่อโปรเจกต์ต้องเป็น npm slug ตัวพิมพ์เล็ก (เช่น `my-app`)
 
@@ -43,7 +43,7 @@ bun run dev
 ตอนสร้าง (ใน TTY) สามารถเลือก `ai`, `stripe`, `email`, และ `storage` ได้ หรือส่งตอนสร้างเลย:
 
 ```bash
-bunx create-valley my-app --packages ai,stripe
+bunx valley new my-app --packages ai,stripe
 ```
 
 ดู [CLI reference](cli.md) และ [แพ็กเกจเสริม](optional-packages.md)

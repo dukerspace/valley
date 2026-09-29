@@ -12,7 +12,7 @@ afterEach(() => {
   }
 })
 
-/** Mirrors templates/valley including agent/skill playbooks and optional packages. */
+/** Mirrors templates/valley (apps + config; no packages/playbooks). */
 function makeTemplateFixture(): string {
   const dir = mkdtempSync(join(tmpdir(), 'valley-create-src-'))
   temps.push(dir)
@@ -20,17 +20,15 @@ function makeTemplateFixture(): string {
   mkdirSync(join(dir, 'apps', 'api'), { recursive: true })
   mkdirSync(join(dir, 'node_modules', '@valley'), { recursive: true })
   mkdirSync(join(dir, '.git'), { recursive: true })
-  mkdirSync(join(dir, '.skills', 'backend'), { recursive: true })
+  // Symlink stand-ins: must be skipped by copyTemplate
+  mkdirSync(join(dir, 'packages', 'should-skip'), { recursive: true })
+  writeFileSync(join(dir, 'packages', 'should-skip', 'package.json'), '{"name":"skip"}\n')
+  mkdirSync(join(dir, '.skills', 'should-skip'), { recursive: true })
+  writeFileSync(join(dir, '.skills', 'should-skip', 'SKILL.md'), '# skip\n')
   mkdirSync(join(dir, '.agents'), { recursive: true })
-
-  for (const pkg of ['database', 'shared', 'ui', 'locale', 'ai', 'stripe', 'email', 'storage']) {
-    mkdirSync(join(dir, 'packages', pkg, 'src'), { recursive: true })
-    writeFileSync(
-      join(dir, 'packages', pkg, 'package.json'),
-      JSON.stringify({ name: `@valley/${pkg}`, private: true }, null, 2)
-    )
-    writeFileSync(join(dir, 'packages', pkg, 'src', 'index.ts'), `export const name = '${pkg}'\n`)
-  }
+  writeFileSync(join(dir, '.agents', 'should-skip.md'), '# skip\n')
+  mkdirSync(join(dir, '.cursor', 'rules'), { recursive: true })
+  writeFileSync(join(dir, '.cursor', 'rules', 'should-skip.mdc'), '# skip\n')
 
   writeFileSync(
     join(dir, 'package.json'),
@@ -88,68 +86,118 @@ function makeTemplateFixture(): string {
       '',
     ].join('\n')
   )
-  writeFileSync(join(dir, '.skills', 'backend', 'SKILL.md'), '# Backend skill\n')
-  writeFileSync(join(dir, '.agents', 'backend.md'), '# Backend agent\n')
 
   return dir
+}
+
+/** Mirrors repo-root packages/ (core + optional). */
+function makePackagesFixture(): string {
+  const dir = mkdtempSync(join(tmpdir(), 'valley-packages-'))
+  temps.push(dir)
+
+  for (const pkg of ['database', 'shared', 'ui', 'locale', 'ai', 'stripe', 'email', 'storage']) {
+    mkdirSync(join(dir, pkg, 'src'), { recursive: true })
+    writeFileSync(
+      join(dir, pkg, 'package.json'),
+      JSON.stringify({ name: `@valley/${pkg}`, private: true }, null, 2)
+    )
+    writeFileSync(join(dir, pkg, 'src', 'index.ts'), `export const name = '${pkg}'\n`)
+  }
+
+  return dir
+}
+
+/** Mirrors CLI-repo .agents / .skills / .cursor/rules. */
+function makePlaybooksFixture(): string {
+  const dir = mkdtempSync(join(tmpdir(), 'valley-playbooks-'))
+  temps.push(dir)
+
+  mkdirSync(join(dir, '.skills', 'backend'), { recursive: true })
+  mkdirSync(join(dir, '.agents'), { recursive: true })
+  mkdirSync(join(dir, '.cursor', 'rules'), { recursive: true })
+  writeFileSync(join(dir, '.skills', 'backend', 'SKILL.md'), '# Backend skill\n')
+  writeFileSync(join(dir, '.agents', 'backend.md'), '# Backend agent\n')
+  writeFileSync(join(dir, '.cursor', 'rules', 'locale-parity.mdc'), '# Locale parity\n')
+
+  return dir
+}
+
+function createOpts(overrides: Parameters<typeof createProject>[0]) {
+  return {
+    packagesRoot: makePackagesFixture(),
+    playbooksRoot: makePlaybooksFixture(),
+    noInstall: true,
+    noGit: true,
+    ...overrides,
+    sourceRoot: overrides.sourceRoot ?? makeTemplateFixture(),
+  }
 }
 
 describe('createProject', () => {
   test('refuses invalid names', async () => {
     const cwd = mkdtempSync(join(tmpdir(), 'valley-create-cwd-'))
     temps.push(cwd)
-    await expect(
-      createProject({
-        name: 'Bad Name',
-        cwd,
-        sourceRoot: makeTemplateFixture(),
-        noInstall: true,
-        noGit: true,
-      })
-    ).rejects.toThrow(/Invalid project name/)
+    await expect(createProject(createOpts({ name: 'Bad Name', cwd }))).rejects.toThrow(
+      /Invalid project name/
+    )
   })
 
   test('refuses existing destination', async () => {
     const cwd = mkdtempSync(join(tmpdir(), 'valley-create-cwd-'))
     temps.push(cwd)
     mkdirSync(join(cwd, 'exists'))
-    await expect(
-      createProject({
-        name: 'exists',
-        cwd,
-        sourceRoot: makeTemplateFixture(),
-        noInstall: true,
-        noGit: true,
-      })
-    ).rejects.toThrow(/already exists/)
+    await expect(createProject(createOpts({ name: 'exists', cwd }))).rejects.toThrow(
+      /already exists/
+    )
   })
 
   test('refuses missing template', async () => {
     const cwd = mkdtempSync(join(tmpdir(), 'valley-create-cwd-'))
     temps.push(cwd)
     await expect(
-      createProject({
-        name: 'gone',
-        cwd,
-        sourceRoot: join(cwd, 'no-such-template'),
-        noInstall: true,
-        noGit: true,
-      })
+      createProject(
+        createOpts({
+          name: 'gone',
+          cwd,
+          sourceRoot: join(cwd, 'no-such-template'),
+        })
+      )
     ).rejects.toThrow(/Template not found/)
+  })
+
+  test('refuses missing shared packages', async () => {
+    const cwd = mkdtempSync(join(tmpdir(), 'valley-create-cwd-'))
+    temps.push(cwd)
+    await expect(
+      createProject(
+        createOpts({
+          name: 'nopkgs',
+          cwd,
+          packagesRoot: join(cwd, 'no-such-packages'),
+        })
+      )
+    ).rejects.toThrow(/Shared packages not found/)
+  })
+
+  test('refuses missing CLI playbooks', async () => {
+    const cwd = mkdtempSync(join(tmpdir(), 'valley-create-cwd-'))
+    temps.push(cwd)
+    await expect(
+      createProject(
+        createOpts({
+          name: 'noplay',
+          cwd,
+          playbooksRoot: join(cwd, 'no-such-playbooks'),
+        })
+      )
+    ).rejects.toThrow(/CLI playbook path not found/)
   })
 
   test('scaffolds from template and renames @valley packages', async () => {
     const cwd = mkdtempSync(join(tmpdir(), 'valley-create-cwd-'))
     temps.push(cwd)
-    const src = makeTemplateFixture()
 
-    const result = await createProject({
-      name: 'rezerch',
-      cwd,
-      sourceRoot: src,
-      noInstall: true,
-      noGit: true,
-    })
+    const result = await createProject(createOpts({ name: 'rezerch', cwd }))
 
     expect(result.name).toBe('rezerch')
     expect(existsSync(result.destRoot)).toBe(true)
@@ -172,23 +220,21 @@ describe('createProject', () => {
 
     expect(existsSync(join(result.destRoot, '.skills', 'backend', 'SKILL.md'))).toBe(true)
     expect(existsSync(join(result.destRoot, '.agents', 'backend.md'))).toBe(true)
+    expect(existsSync(join(result.destRoot, '.cursor', 'rules', 'locale-parity.mdc'))).toBe(true)
+    expect(existsSync(join(result.destRoot, '.skills', 'should-skip'))).toBe(false)
+    expect(existsSync(join(result.destRoot, '.agents', 'should-skip.md'))).toBe(false)
     expect(existsSync(join(result.destRoot, 'node_modules'))).toBe(false)
     expect(existsSync(join(result.destRoot, '.git'))).toBe(false)
+    expect(existsSync(join(result.destRoot, 'packages', 'database'))).toBe(true)
+    expect(existsSync(join(result.destRoot, 'packages', 'shared'))).toBe(true)
+    expect(existsSync(join(result.destRoot, 'packages', 'should-skip'))).toBe(false)
   })
 
   test('dry-run does not create destination', async () => {
     const cwd = mkdtempSync(join(tmpdir(), 'valley-create-cwd-'))
     temps.push(cwd)
-    const src = makeTemplateFixture()
 
-    await createProject({
-      name: 'dry-app',
-      cwd,
-      sourceRoot: src,
-      noInstall: true,
-      noGit: true,
-      dryRun: true,
-    })
+    await createProject(createOpts({ name: 'dry-app', cwd, dryRun: true }))
 
     expect(existsSync(join(cwd, 'dry-app'))).toBe(false)
   })
@@ -196,16 +242,10 @@ describe('createProject', () => {
   test('keeps selected optional packages and links them into api', async () => {
     const cwd = mkdtempSync(join(tmpdir(), 'valley-create-cwd-'))
     temps.push(cwd)
-    const src = makeTemplateFixture()
 
-    const result = await createProject({
-      name: 'with-opts',
-      cwd,
-      sourceRoot: src,
-      noInstall: true,
-      noGit: true,
-      packages: ['ai', 'stripe'],
-    })
+    const result = await createProject(
+      createOpts({ name: 'with-opts', cwd, packages: ['ai', 'stripe'] })
+    )
 
     expect(existsSync(join(result.destRoot, 'packages', 'ai'))).toBe(true)
     expect(existsSync(join(result.destRoot, 'packages', 'stripe'))).toBe(true)
@@ -232,16 +272,8 @@ describe('createProject', () => {
   test('removes all optional packages when none selected', async () => {
     const cwd = mkdtempSync(join(tmpdir(), 'valley-create-cwd-'))
     temps.push(cwd)
-    const src = makeTemplateFixture()
 
-    const result = await createProject({
-      name: 'bare',
-      cwd,
-      sourceRoot: src,
-      noInstall: true,
-      noGit: true,
-      packages: [],
-    })
+    const result = await createProject(createOpts({ name: 'bare', cwd, packages: [] }))
 
     for (const id of ['ai', 'stripe', 'email', 'storage']) {
       expect(existsSync(join(result.destRoot, 'packages', id))).toBe(false)

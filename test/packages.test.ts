@@ -1,6 +1,8 @@
 import { describe, expect, test } from 'bun:test'
 import {
   applyPackageSelection,
+  appendEnvExampleSections,
+  extractEnvSection,
   parsePackagesFlag,
   pruneEnvExample,
   OPTIONAL_PACKAGES,
@@ -56,6 +58,47 @@ describe('pruneEnvExample', () => {
     expect(next).not.toContain('# --- Optional: ai ---')
     expect(next).not.toContain('OPENAI_API_KEY')
     expect(next).not.toContain('AI_PROVIDER')
+  })
+})
+
+describe('appendEnvExampleSections', () => {
+  const full = [
+    'SECRET=',
+    '',
+    '# --- Optional: ai ---',
+    '# AI_PROVIDER="openai"',
+    '# OPENAI_API_KEY=""',
+    '',
+    '# --- Optional: stripe ---',
+    '# STRIPE_SECRET_KEY=""',
+    '',
+    '# --- Optional: email ---',
+    '# RESEND_API_KEY=""',
+  ].join('\n')
+
+  test('extractEnvSection returns one optional block', () => {
+    const section = extractEnvSection(full, 'stripe')
+    expect(section).toContain('# --- Optional: stripe ---')
+    expect(section).toContain('# STRIPE_SECRET_KEY=""')
+    expect(section).not.toContain('Optional: ai')
+    expect(section).not.toContain('Optional: email')
+  })
+
+  test('appends only missing sections', () => {
+    const existing = ['SECRET=', '', '# --- Optional: ai ---', '# AI_PROVIDER="openai"', ''].join(
+      '\n'
+    )
+    const next = appendEnvExampleSections(existing, ['ai', 'stripe'], full)
+    expect(next).toContain('# --- Optional: ai ---')
+    expect(next).toContain('# --- Optional: stripe ---')
+    expect(next).toContain('# STRIPE_SECRET_KEY=""')
+    expect(next.match(/# --- Optional: ai ---/g)?.length).toBe(1)
+  })
+
+  test('no-op when all sections already present', () => {
+    const existing = appendEnvExampleSections('SECRET=\n', ['stripe'], full)
+    const again = appendEnvExampleSections(existing, ['stripe'], full)
+    expect(again).toBe(existing)
   })
 })
 

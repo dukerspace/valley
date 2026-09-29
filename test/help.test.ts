@@ -3,9 +3,12 @@ import { HELP, printHelp } from '../src/help.ts'
 
 describe('help', () => {
   test('HELP includes usage and version flag', () => {
-    expect(HELP).toContain('npx create-valley <name> [options]')
-    expect(HELP).toContain('bunx create-valley <name> [options]')
-    expect(HELP).toContain('bun run create-valley <name> [options]')
+    expect(HELP).toContain('npx valley new <name> [options]')
+    expect(HELP).toContain('bunx valley new <name> [options]')
+    expect(HELP).toContain('bun run valley -- new <name> [options]')
+    expect(HELP).toContain('new <name>')
+    expect(HELP).toContain('add <pkg...>')
+    expect(HELP).toContain('valley add ai')
     expect(HELP).toContain('-v, --version')
     expect(HELP).toContain('-h, --help')
     expect(HELP).toContain('--packages')

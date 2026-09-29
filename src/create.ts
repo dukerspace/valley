@@ -5,18 +5,22 @@ import { hasBun } from './helpers/bun.ts'
 import { initGit } from './helpers/git.ts'
 import { isValidProjectName } from './helpers/name.ts'
 import { renameProject, TEMPLATE_SCOPE } from './helpers/rename.ts'
-import { copyTemplate, stripScaffolding } from './helpers/template.ts'
+import { copyCliPlaybooks, copySharedPackages, copyTemplate, stripScaffolding } from './helpers/template.ts'
 import {
   applyPackageSelection,
   OPTIONAL_PACKAGES,
   type OptionalPackage,
 } from './packages.ts'
-import { TEMPLATE_ROOT } from './paths.ts'
+import { CLI_PLAYBOOK_PATHS, PACKAGE_ROOT, SHARED_PACKAGES_ROOT, TEMPLATE_ROOT } from './paths.ts'
 
 export type CreateProjectOptions = {
   name: string
   cwd?: string
   sourceRoot?: string
+  /** Shared packages source (default: repo-root packages/). */
+  packagesRoot?: string
+  /** CLI playbooks root (default: PACKAGE_ROOT). */
+  playbooksRoot?: string
   noInstall?: boolean
   noGit?: boolean
   dryRun?: boolean
@@ -36,6 +40,8 @@ export async function createProject(options: CreateProjectOptions): Promise<Crea
     name: rawName,
     cwd = process.cwd(),
     sourceRoot = TEMPLATE_ROOT,
+    packagesRoot = SHARED_PACKAGES_ROOT,
+    playbooksRoot = PACKAGE_ROOT,
     noInstall = false,
     noGit = false,
     dryRun = false,
@@ -53,6 +59,16 @@ export async function createProject(options: CreateProjectOptions): Promise<Crea
     )
   }
 
+  if (!existsSync(packagesRoot)) {
+    throw new Error(`Shared packages not found at ${packagesRoot}`)
+  }
+
+  for (const rel of CLI_PLAYBOOK_PATHS) {
+    if (!existsSync(join(playbooksRoot, rel))) {
+      throw new Error(`CLI playbook path not found at ${join(playbooksRoot, rel)}`)
+    }
+  }
+
   const destRoot = resolve(cwd, name)
   if (existsSync(destRoot)) {
     throw new Error(`Directory already exists: ${destRoot}`)
@@ -64,27 +80,33 @@ export async function createProject(options: CreateProjectOptions): Promise<Crea
 
   const packages = [...selectedPackages]
 
-  console.log(`[create-valley] Creating ${name} from templates/${TEMPLATE_SCOPE}…`)
-  const copied = copyTemplate(sourceRoot, destRoot, { dryRun })
-  console.log(`[create-valley] Copied ${copied.length} file(s)${dryRun ? ' (dry run)' : ''}.`)
+  console.log(`[valley] Creating ${name} from templates/${TEMPLATE_SCOPE}…`)
+  const templateCopied = copyTemplate(sourceRoot, destRoot, { dryRun })
+  const packagesCopied = copySharedPackages(packagesRoot, destRoot, { dryRun })
+  const playbooksCopied = copyCliPlaybooks(playbooksRoot, destRoot, {
+    dryRun,
+    paths: CLI_PLAYBOOK_PATHS,
+  })
+  const copied = [...templateCopied, ...packagesCopied, ...playbooksCopied]
+  console.log(`[valley] Copied ${copied.length} file(s)${dryRun ? ' (dry run)' : ''}.`)
 
   if (packages.length > 0) {
-    console.log(`[create-valley] Optional packages: ${packages.join(', ')}`)
+    console.log(`[valley] Optional packages: ${packages.join(', ')}`)
   } else {
-    console.log('[create-valley] Optional packages: (none)')
+    console.log('[valley] Optional packages: (none)')
   }
 
   if (dryRun) {
     const wouldRemove = OPTIONAL_PACKAGES.filter((id) => !packages.includes(id))
     if (wouldRemove.length > 0) {
-      console.log(`[create-valley] Would remove packages: ${wouldRemove.join(', ')}`)
+      console.log(`[valley] Would remove packages: ${wouldRemove.join(', ')}`)
     }
     if (packages.length > 0) {
-      console.log(`[create-valley] Would link into apps/api: ${packages.join(', ')}`)
+      console.log(`[valley] Would link into apps/api: ${packages.join(', ')}`)
     }
-    if (name !== TEMPLATE_SCOPE) console.log(`[create-valley] Would rename @${TEMPLATE_SCOPE} → @${name}`)
-    if (!noGit) console.log('[create-valley] Would run: git init')
-    if (!noInstall) console.log('[create-valley] Would run: bun install')
+    if (name !== TEMPLATE_SCOPE) console.log(`[valley] Would rename @${TEMPLATE_SCOPE} → @${name}`)
+    if (!noGit) console.log('[valley] Would run: git init')
+    if (!noInstall) console.log('[valley] Would run: bun install')
     return { destRoot, copied, name, packages }
   }
 
@@ -92,25 +114,25 @@ export async function createProject(options: CreateProjectOptions): Promise<Crea
 
   const selection = applyPackageSelection(destRoot, packages)
   if (selection.removed.length > 0) {
-    console.log(`[create-valley] Removed unused packages: ${selection.removed.join(', ')}`)
+    console.log(`[valley] Removed unused packages: ${selection.removed.join(', ')}`)
   }
   if (selection.linked.length > 0) {
-    console.log(`[create-valley] Linked into apps/api: ${selection.linked.join(', ')}`)
+    console.log(`[valley] Linked into apps/api: ${selection.linked.join(', ')}`)
   }
 
   const renamed = renameProject({ rootDir: destRoot, name })
   if (renamed.changed.length > 0) {
-    console.log(`[create-valley] Renamed @${TEMPLATE_SCOPE} → @${name} in ${renamed.changed.length} file(s).`)
+    console.log(`[valley] Renamed @${TEMPLATE_SCOPE} → @${name} in ${renamed.changed.length} file(s).`)
   }
 
   if (!noGit) {
     if (!initGit(destRoot)) {
-      console.warn('[create-valley] git init failed; continuing.')
+      console.warn('[valley] git init failed; continuing.')
     }
   }
 
   if (!noInstall) {
-    console.log('[create-valley] Running bun install…')
+    console.log('[valley] Running bun install…')
     const install = spawnSync('bun', ['install'], {
       cwd: destRoot,
       encoding: 'utf8',
@@ -121,7 +143,7 @@ export async function createProject(options: CreateProjectOptions): Promise<Crea
     }
   }
 
-  console.log(`[create-valley] Done. Next:`)
+  console.log(`[valley] Done. Next:`)
   console.log(`  cd ${name}`)
   if (noInstall) console.log('  bun install')
   console.log('  cp .env.example .env')

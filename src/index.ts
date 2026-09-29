@@ -2,9 +2,9 @@
 /**
  * Scaffold a new project from templates/valley.
  *
- *   npx create-valley <name>
- *   bunx create-valley <name>
- *   bun run create-valley <name>
+ *   npx valley new <name>
+ *   bunx valley new <name>
+ *   bun run valley -- new <name>
  */
 
 import { resolve } from 'node:path'
@@ -19,6 +19,7 @@ if (isDirectRun) {
 }
 
 export { main } from './cli.ts'
+export { addPackages } from './add.ts'
 export { createProject } from './create.ts'
 export { HELP, printHelp } from './help.ts'
 export { getVersion, printVersion } from './version.ts'

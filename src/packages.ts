@@ -80,26 +80,7 @@ export function applyPackageSelection(
     }
   }
 
-  const apiPkgPath = join(destRoot, 'apps', 'api', 'package.json')
-  if (existsSync(apiPkgPath) && selected.length > 0) {
-    const raw = dryRun ? '' : readFileSync(apiPkgPath, 'utf8')
-    if (!dryRun) {
-      const pkg = JSON.parse(raw) as {
-        dependencies?: Record<string, string>
-      }
-      pkg.dependencies ??= {}
-      for (const id of selected) {
-        const depName = `@${scope}/${id}`
-        pkg.dependencies[depName] = '*'
-        linked.push(id)
-      }
-      writeFileSync(apiPkgPath, `${JSON.stringify(pkg, null, 2)}\n`)
-    } else {
-      for (const id of selected) linked.push(id)
-    }
-  } else if (selected.length > 0 && dryRun) {
-    for (const id of selected) linked.push(id)
-  }
+  linked.push(...linkPackagesIntoApi(destRoot, selected, { dryRun, scope }))
 
   const envPath = join(destRoot, '.env.example')
   if (existsSync(envPath) && !dryRun) {
@@ -108,6 +89,36 @@ export function applyPackageSelection(
   }
 
   return { removed, linked }
+}
+
+/** Link optional packages into apps/api dependencies as `@<scope>/<id>: "*"`. */
+export function linkPackagesIntoApi(
+  destRoot: string,
+  ids: readonly OptionalPackage[],
+  options: { dryRun?: boolean; scope?: string } = {}
+): string[] {
+  const { dryRun = false, scope = TEMPLATE_SCOPE } = options
+  if (ids.length === 0) return []
+
+  const apiPkgPath = join(destRoot, 'apps', 'api', 'package.json')
+  if (!existsSync(apiPkgPath)) {
+    if (dryRun) return [...ids]
+    throw new Error(`apps/api/package.json not found at ${apiPkgPath}`)
+  }
+
+  if (dryRun) return [...ids]
+
+  const pkg = JSON.parse(readFileSync(apiPkgPath, 'utf8')) as {
+    dependencies?: Record<string, string>
+  }
+  pkg.dependencies ??= {}
+  const linked: string[] = []
+  for (const id of ids) {
+    pkg.dependencies[`@${scope}/${id}`] = '*'
+    linked.push(id)
+  }
+  writeFileSync(apiPkgPath, `${JSON.stringify(pkg, null, 2)}\n`)
+  return linked
 }
 
 /** Remove `# --- Optional: <id> ---` sections that were not selected. */
@@ -152,4 +163,62 @@ export function pruneEnvExample(
     out.pop()
   }
   return `${out.join('\n')}\n`
+}
+
+/** Extract a single `# --- Optional: <id> ---` block (including trailing blank lines). */
+export function extractEnvSection(
+  content: string,
+  id: OptionalPackage
+): string | null {
+  const lines = content.split(/\r?\n/)
+  const headerRe = /^# --- Optional: (\w+) ---$/
+  const start = lines.findIndex((line) => {
+    const match = line.match(headerRe)
+    return match?.[1] === id
+  })
+  if (start < 0) return null
+
+  const block: string[] = [lines[start]!]
+  for (let i = start + 1; i < lines.length; i++) {
+    const line = lines[i]!
+    if (/^# --- /.test(line)) break
+    block.push(line)
+  }
+
+  while (block.length > 0 && block[block.length - 1] === '') {
+    block.pop()
+  }
+  return block.join('\n')
+}
+
+/**
+ * Append missing optional env sections from a full template `.env.example`.
+ * Existing sections (by header) are left untouched.
+ */
+export function appendEnvExampleSections(
+  content: string,
+  ids: readonly OptionalPackage[],
+  fullTemplateEnv: string
+): string {
+  if (ids.length === 0) return content.endsWith('\n') ? content : `${content}\n`
+
+  const existing = new Set<OptionalPackage>()
+  for (const line of content.split(/\r?\n/)) {
+    const match = line.match(/^# --- Optional: (\w+) ---$/)
+    const id = match?.[1]
+    if (id && isOptionalPackage(id)) existing.add(id)
+  }
+
+  const toAdd = ids.filter((id) => !existing.has(id))
+  if (toAdd.length === 0) {
+    return content.endsWith('\n') ? content : `${content}\n`
+  }
+
+  let next = content.replace(/\s*$/, '')
+  for (const id of toAdd) {
+    const section = extractEnvSection(fullTemplateEnv, id)
+    if (!section) continue
+    next = `${next}\n\n${section}`
+  }
+  return `${next}\n`
 }
