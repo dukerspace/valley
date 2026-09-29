@@ -4,8 +4,8 @@ export const HELP = `valley
   (Hono API, TanStack Start, Prisma).
 
 Usage
-  npx valley new <name> [options]
-  bunx valley new <name> [options]
+  npx valley-cli new <name> [options]
+  bunx valley-cli new <name> [options]
   bun run valley -- new <name> [options]
   valley add <pkg> [pkg...] [options]
 
@@ -25,8 +25,8 @@ Options
   -h, --help      Show this help
 
 Examples
-  npx valley new my-app
-  bunx valley new my-app --packages ai,stripe
+  npx valley-cli new my-app
+  bunx valley-cli new my-app --packages ai,stripe
   bun run valley -- new my-app --no-install --no-git
   valley add ai
   valley add ai stripe --no-install

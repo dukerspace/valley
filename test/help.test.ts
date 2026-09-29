@@ -3,8 +3,8 @@ import { HELP, printHelp } from '../src/help.ts'
 
 describe('help', () => {
   test('HELP includes usage and version flag', () => {
-    expect(HELP).toContain('npx valley new <name> [options]')
-    expect(HELP).toContain('bunx valley new <name> [options]')
+    expect(HELP).toContain('npx valley-cli new <name> [options]')
+    expect(HELP).toContain('bunx valley-cli new <name> [options]')
     expect(HELP).toContain('bun run valley -- new <name> [options]')
     expect(HELP).toContain('new <name>')
     expect(HELP).toContain('add <pkg...>')

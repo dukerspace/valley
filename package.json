@@ -1,5 +1,5 @@
 {
-  "name": "valley",
+  "name": "valley-cli",
   "version": "0.1.0",
   "description": "Scaffold a Bun + Turbo full-stack app (Hono, TanStack Start, Prisma)",
   "author": "dukerspace",

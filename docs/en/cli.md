@@ -5,7 +5,7 @@ valley new <name> [options]
 valley add <pkg> [pkg...] [options]
 ```
 
-Also available as `npx valley`, `bunx valley`, or `bun run valley --` from this repository.
+Also available as `npx valley-cli`, `bunx valley-cli`, or `bun run valley --` from this repository.
 
 ## Commands
 
@@ -67,10 +67,10 @@ For each package, the CLI copies from the valley package sources, renames `@vall
 ## Examples
 
 ```bash
-npx valley new my-app
-bunx valley new my-app --packages ai,stripe
+npx valley-cli new my-app
+bunx valley-cli new my-app --packages ai,stripe
 bun run valley -- new my-app --no-install --no-git
-bunx valley new my-app --dry-run
+bunx valley-cli new my-app --dry-run
 cd my-app && valley add email storage
 ```
 
