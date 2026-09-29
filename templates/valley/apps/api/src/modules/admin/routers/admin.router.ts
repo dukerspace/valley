@@ -1,44 +1,76 @@
 import { Hono } from 'hono'
-import { ROLE } from '@valley/shared'
-import type { AppEnv } from '../../../middleware/auth.ts'
-import { createAdminAuthMiddleware, requireAdminRole } from '../../../middleware/auth.ts'
-import { createAdminHandlers } from '../handlers/admin.handler.ts'
 import {
-  createAdminRepository,
-  type AdminRepository,
-} from '../repositories/admin.repository.ts'
-import { createAdminService, type AdminService } from '../services/admin.service.ts'
+  authAdminSchema,
+  createAdminSchema,
+  forgetPasswordSchema,
+  idParamSchema,
+  initSuperAdminSchema,
+  paginationQuerySchema,
+  refreshTokenSchema,
+  resetPasswordSchema,
+  ROLE,
+  updateAdminSchema,
+} from '@valley/shared'
+import { adminAuthMiddleware, requireAdminRole } from '../../../middleware/admin-auth.ts'
+import type { AppEnv } from '../../../middleware/auth.ts'
+import { zValidator } from '../../../utils/validation.ts'
+import * as adminHandler from '../handlers/admin.handler.ts'
 
-export function createAdminsRouter(options: {
-  repository?: AdminRepository
-  service?: AdminService
-  getBackofficeUrl: () => string
-  usersRouter?: Hono<AppEnv>
-}) {
-  const repository = options.repository ?? createAdminRepository()
-  const service = options.service ?? createAdminService(repository)
-  const handlers = createAdminHandlers(service, options.getBackofficeUrl)
-  const adminAuth = createAdminAuthMiddleware((id) => service.findById(id))
-  const superAdmin = requireAdminRole(ROLE.SUPER_ADMIN)
-  const router = new Hono<AppEnv>()
+export const adminCoreRoutes = new Hono<AppEnv>()
 
-  router.get('/init', handlers.canInit)
-  router.post('/init', handlers.init)
-  router.post('/login', handlers.login)
-  router.post('/refresh', handlers.refresh)
-  router.post('/forgot-password', handlers.forgot)
-  router.post('/reset-password', handlers.reset)
+adminCoreRoutes.get('/init', adminHandler.canInit)
+adminCoreRoutes.post(
+  '/init',
+  zValidator('json', initSuperAdminSchema),
+  adminHandler.init
+)
+adminCoreRoutes.post('/login', zValidator('json', authAdminSchema), adminHandler.login)
+adminCoreRoutes.post(
+  '/refresh',
+  zValidator('json', refreshTokenSchema),
+  adminHandler.refresh
+)
+adminCoreRoutes.post(
+  '/forgot-password',
+  zValidator('json', forgetPasswordSchema),
+  adminHandler.forgot
+)
+adminCoreRoutes.post(
+  '/reset-password',
+  zValidator('json', resetPasswordSchema),
+  adminHandler.reset
+)
 
-  router.get('/me', adminAuth, handlers.me)
+adminCoreRoutes.get('/me', adminAuthMiddleware, adminHandler.me)
 
-  if (options.usersRouter) {
-    router.route('/users', options.usersRouter)
-  }
+const superAdmin = requireAdminRole(ROLE.SUPER_ADMIN)
 
-  router.get('/', adminAuth, superAdmin, handlers.list)
-  router.post('/', adminAuth, superAdmin, handlers.create)
-  router.patch('/:id', adminAuth, superAdmin, handlers.update)
-  router.delete('/:id', adminAuth, superAdmin, handlers.remove)
-
-  return { router, service, repository }
-}
+adminCoreRoutes.get(
+  '/',
+  adminAuthMiddleware,
+  superAdmin,
+  zValidator('query', paginationQuerySchema),
+  adminHandler.list
+)
+adminCoreRoutes.post(
+  '/',
+  adminAuthMiddleware,
+  superAdmin,
+  zValidator('json', createAdminSchema),
+  adminHandler.create
+)
+adminCoreRoutes.patch(
+  '/:id',
+  adminAuthMiddleware,
+  superAdmin,
+  zValidator('param', idParamSchema),
+  zValidator('json', updateAdminSchema),
+  adminHandler.update
+)
+adminCoreRoutes.delete(
+  '/:id',
+  adminAuthMiddleware,
+  superAdmin,
+  zValidator('param', idParamSchema),
+  adminHandler.remove
+)

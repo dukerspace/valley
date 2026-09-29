@@ -1,13 +1,26 @@
 ---
 name: locale-translator
-description: Locale and i18n playbook for key discovery, placeholder/ICU safety, locale parity, and missing/unused key reports. Use when editing locales, i18n catalogs, translations, or untranslated UI copy.
+description: Locale and i18n playbook for key discovery, placeholder/ICU safety, locale parity, and missing/unused key reports. Use whenever a change adds or edits user-facing copy (UI labels, errors, empty states, emails, notifications, display messages), or when editing locales, i18n catalogs, or translations — not only when locale files are already open.
 paths:
   - '**/locales/**'
   - '**/i18n/**'
+  - '**/packages/locale/**'
+  - '**/*.{tsx,jsx}'
   - '**/*.{po,xliff}'
 ---
 
 # Locale Translator
+
+## Mandatory gate
+
+Any task that adds or changes user-facing copy is incomplete until:
+
+1. Keys exist in **all** active locales (same structure).
+2. Placeholders / ICU tokens match the source.
+3. Locale parity test passes (`bun test` in `packages/locale`, or the repo's equivalent).
+4. A short locale report is included (or `Locale: N/A` with reason if no copy changed).
+
+Do not leave a locale behind. Translating only one language is not done.
 
 ## Key discovery
 
@@ -36,6 +49,7 @@ For every key add/change:
 - [ ] Nested structure matches across locales
 - [ ] Punctuation and placeholders preserved
 - [ ] Tone fits the string role (button, title, error, empty state)
+- [ ] Locale parity test run and passing
 
 ## Missing / unused key report
 
@@ -48,9 +62,10 @@ When finishing, report:
 - Keys added/updated: ...
 - Missing in other locales: ...
 - Possibly unused keys noticed: ...
+- Parity test: PASS/FAIL (command + result)
 ```
 
-Do not silently leave a locale behind. If a translation is uncertain, keep meaning faithful and note the uncertainty.
+If a translation is uncertain, keep meaning faithful and note the uncertainty.
 
 ## Handoffs
 

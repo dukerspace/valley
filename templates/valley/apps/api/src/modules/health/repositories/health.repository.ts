@@ -5,11 +5,7 @@ export type DatabaseHealth = {
   version: string | null
 }
 
-export type HealthRepository = {
-  check: () => Promise<DatabaseHealth>
-}
-
-class HealthRepositoryImpl implements HealthRepository {
+class HealthRepository {
   async check(): Promise<DatabaseHealth> {
     try {
       const rows = await prisma.$queryRaw<Array<{ version: string }>>`
@@ -23,4 +19,4 @@ class HealthRepositoryImpl implements HealthRepository {
   }
 }
 
-export const healthRepository = new HealthRepositoryImpl()
+export const healthRepository = new HealthRepository()

@@ -1,7 +1,9 @@
 {
   "name": "create-valley",
   "version": "0.1.0",
-  "description": "CLI that scaffolds a Bun + Turbo app (Hono API, TanStack Start, Prisma)",
+  "description": "Scaffold a Bun + Turbo full-stack app (Hono, TanStack Start, Prisma)",
+  "author": "dukerspace",
+  "license": "MIT",
   "type": "module",
   "bin": {
     "create-valley": "./src/index.ts"
@@ -36,5 +38,8 @@
   },
   "engines": {
     "bun": ">=1.3.0"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.8.1"
   }
 }

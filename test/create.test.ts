@@ -12,7 +12,7 @@ afterEach(() => {
   }
 })
 
-/** Mirrors templates/valley including agent/skill playbooks. */
+/** Mirrors templates/valley including agent/skill playbooks and optional packages. */
 function makeTemplateFixture(): string {
   const dir = mkdtempSync(join(tmpdir(), 'valley-create-src-'))
   temps.push(dir)
@@ -22,6 +22,15 @@ function makeTemplateFixture(): string {
   mkdirSync(join(dir, '.git'), { recursive: true })
   mkdirSync(join(dir, '.skills', 'backend'), { recursive: true })
   mkdirSync(join(dir, '.agents'), { recursive: true })
+
+  for (const pkg of ['database', 'shared', 'ui', 'locale', 'ai', 'stripe', 'email', 'storage']) {
+    mkdirSync(join(dir, 'packages', pkg, 'src'), { recursive: true })
+    writeFileSync(
+      join(dir, 'packages', pkg, 'package.json'),
+      JSON.stringify({ name: `@valley/${pkg}`, private: true }, null, 2)
+    )
+    writeFileSync(join(dir, 'packages', pkg, 'src', 'index.ts'), `export const name = '${pkg}'\n`)
+  }
 
   writeFileSync(
     join(dir, 'package.json'),
@@ -39,12 +48,46 @@ function makeTemplateFixture(): string {
   )
   writeFileSync(
     join(dir, 'apps', 'api', 'package.json'),
-    JSON.stringify({ name: '@valley/api' }, null, 2)
+    JSON.stringify(
+      {
+        name: '@valley/api',
+        dependencies: {
+          '@valley/database': '*',
+          '@valley/shared': '*',
+        },
+      },
+      null,
+      2
+    )
   )
   writeFileSync(join(dir, 'node_modules', '@valley', 'pkg.json'), '{"name":"@valley/skip"}\n')
   writeFileSync(join(dir, '.git', 'config'), '[core]\n')
   writeFileSync(join(dir, '.env'), 'SECRET=1\n')
-  writeFileSync(join(dir, '.env.example'), 'SECRET=\n')
+  writeFileSync(
+    join(dir, '.env.example'),
+    [
+      'SECRET=',
+      '',
+      '# --- Optional: ai ---',
+      '# AI_PROVIDER="openai"   # openai | anthropic | google | openrouter',
+      '# AI_MODEL=""',
+      '# AI_BASE_URL=""',
+      '# OPENAI_API_KEY=""',
+      '# ANTHROPIC_API_KEY=""',
+      '# GOOGLE_GENERATIVE_AI_API_KEY=""',
+      '# OPENROUTER_API_KEY=""',
+      '',
+      '# --- Optional: stripe ---',
+      '# STRIPE_SECRET_KEY=""',
+      '',
+      '# --- Optional: email ---',
+      '# RESEND_API_KEY=""',
+      '',
+      '# --- Optional: storage ---',
+      '# S3_BUCKET=""',
+      '',
+    ].join('\n')
+  )
   writeFileSync(join(dir, '.skills', 'backend', 'SKILL.md'), '# Backend skill\n')
   writeFileSync(join(dir, '.agents', 'backend.md'), '# Backend agent\n')
 
@@ -148,5 +191,64 @@ describe('createProject', () => {
     })
 
     expect(existsSync(join(cwd, 'dry-app'))).toBe(false)
+  })
+
+  test('keeps selected optional packages and links them into api', async () => {
+    const cwd = mkdtempSync(join(tmpdir(), 'valley-create-cwd-'))
+    temps.push(cwd)
+    const src = makeTemplateFixture()
+
+    const result = await createProject({
+      name: 'with-opts',
+      cwd,
+      sourceRoot: src,
+      noInstall: true,
+      noGit: true,
+      packages: ['ai', 'stripe'],
+    })
+
+    expect(existsSync(join(result.destRoot, 'packages', 'ai'))).toBe(true)
+    expect(existsSync(join(result.destRoot, 'packages', 'stripe'))).toBe(true)
+    expect(existsSync(join(result.destRoot, 'packages', 'email'))).toBe(false)
+    expect(existsSync(join(result.destRoot, 'packages', 'storage'))).toBe(false)
+    expect(existsSync(join(result.destRoot, 'packages', 'database'))).toBe(true)
+
+    const api = JSON.parse(
+      readFileSync(join(result.destRoot, 'apps', 'api', 'package.json'), 'utf8')
+    ) as { dependencies: Record<string, string> }
+    expect(api.dependencies['@with-opts/ai']).toBe('*')
+    expect(api.dependencies['@with-opts/stripe']).toBe('*')
+    expect(api.dependencies['@with-opts/email']).toBeUndefined()
+
+    const env = readFileSync(join(result.destRoot, '.env.example'), 'utf8')
+    expect(env).toContain('# --- Optional: ai ---')
+    expect(env).toContain('AI_PROVIDER')
+    expect(env).toContain('OPENROUTER_API_KEY')
+    expect(env).toContain('# --- Optional: stripe ---')
+    expect(env).not.toContain('# --- Optional: email ---')
+    expect(env).not.toContain('# --- Optional: storage ---')
+  })
+
+  test('removes all optional packages when none selected', async () => {
+    const cwd = mkdtempSync(join(tmpdir(), 'valley-create-cwd-'))
+    temps.push(cwd)
+    const src = makeTemplateFixture()
+
+    const result = await createProject({
+      name: 'bare',
+      cwd,
+      sourceRoot: src,
+      noInstall: true,
+      noGit: true,
+      packages: [],
+    })
+
+    for (const id of ['ai', 'stripe', 'email', 'storage']) {
+      expect(existsSync(join(result.destRoot, 'packages', id))).toBe(false)
+    }
+    expect(existsSync(join(result.destRoot, 'packages', 'shared'))).toBe(true)
+
+    const env = readFileSync(join(result.destRoot, '.env.example'), 'utf8')
+    expect(env).not.toContain('# --- Optional:')
   })
 })

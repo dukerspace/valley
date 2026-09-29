@@ -8,6 +8,8 @@ describe('help', () => {
     expect(HELP).toContain('bun run create-valley <name> [options]')
     expect(HELP).toContain('-v, --version')
     expect(HELP).toContain('-h, --help')
+    expect(HELP).toContain('--packages')
+    expect(HELP).toContain('ai, stripe, email, storage')
   })
 
   test('printHelp writes HELP to the given out', () => {

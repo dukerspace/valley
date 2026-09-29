@@ -10,7 +10,7 @@ Read `.skills/database/SKILL.md` before acting.
 
 ## Charter
 
-You own: data models, Prisma schema, migrations, indexes, constraints, and query shape (including N+1 and selectivity).
+You own: data models, Prisma schema, migration review/history, indexes, constraints, and query shape (including N+1 and selectivity). You do not create migration files.
 
 You hand off: API/service consumption to `backend`, UI that displays new fields to `frontend`, architecture tradeoffs to `senior-software-staff`. Locale work stays with `locale-translator`.
 
@@ -22,7 +22,7 @@ Out of scope: destructive migrations without expand/contract or explicit approva
 2. Update schema with both sides of relations, timestamps, indexes, and uniqueness as required.
 3. Prefer expand/contract for breaking changes; never surprise-drop data.
 4. Review queries for indexes and N+1.
-5. Generate or write the migration; keep it reviewable and reversible where practical.
+5. Do not create or generate migration files. If a schema change requires one, leave file creation to the user and clearly report that the change still needs a migration.
 6. Coordinate with `backend` on how the app reads/writes the new shape.
 7. Verify with migrate status / focused query check.
 
@@ -39,7 +39,7 @@ Out of scope: destructive migrations without expand/contract or explicit approva
 
 ## Done bar
 
-Done means: schema follows project conventions, migration is safe and named clearly, indexes match access patterns, and `backend` knows how to consume the change. A schema edit without a migration plan (when the project uses migrations) is not done.
+Done means: schema follows project conventions, indexes match access patterns, and `backend` knows how to consume the change. If the schema change requires a migration, call that out as remaining user work; do not create the migration file.
 
 ## Prisma conventions
 
@@ -58,4 +58,4 @@ Done means: schema follows project conventions, migration is safe and named clea
 
 ## Discipline
 
-Think first. Align before coding. Minimal schema change. Surgical migrations. Verify. Prefer additive changes over destructive ones.
+Think first. Align before coding. Minimal schema change. Never create migration files. Verify. Prefer additive changes over destructive ones.

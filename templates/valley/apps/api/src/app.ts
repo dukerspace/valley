@@ -7,17 +7,9 @@ import {
   errorHandlerMiddleware,
   notFoundMiddleware,
 } from './middleware/error-handler.ts'
-import type { AdminRepository } from './modules/admin/index.ts'
-import type { HealthRepository } from './modules/health/index.ts'
-import type { UserRepository } from './modules/user/index.ts'
 import { registerV1Routes } from './routes/v1-routes.ts'
 
-export function createApp(options?: {
-  healthRepository?: HealthRepository
-  userRepository?: UserRepository
-  adminRepository?: AdminRepository
-  env?: NodeJS.ProcessEnv
-}) {
+export function createApp(options?: { env?: NodeJS.ProcessEnv }) {
   const env = parseServerEnv(options?.env ?? process.env)
   const app = new Hono<AppEnv>()
   const v1 = new Hono<AppEnv>()
@@ -37,13 +29,7 @@ export function createApp(options?: {
 
   app.use('*', errorHandlerMiddleware)
 
-  const { userRepository, adminRepository } = registerV1Routes(v1, {
-    healthRepository: options?.healthRepository,
-    userRepository: options?.userRepository,
-    adminRepository: options?.adminRepository,
-    getFrontendUrl: () => env.FRONTEND_URL,
-    getBackofficeUrl: () => env.BACKOFFICE_URL,
-  })
+  registerV1Routes(v1)
 
   app.route(`${appConfig.API_PREFIX}/${appConfig.API_VERSION}`, v1)
 
@@ -56,5 +42,5 @@ export function createApp(options?: {
 
   app.notFound(notFoundMiddleware)
 
-  return { app, env, userRepository, adminRepository }
+  return { app, env }
 }

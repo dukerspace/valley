@@ -57,6 +57,7 @@ Before testing, lock:
 - [ ] No unrelated fixtures or suite-wide refactors
 - [ ] Focused command documented and run
 - [ ] Failures include owner handoff (`frontend` / `backend` / `database` / `locale-translator`)
+- [ ] If the diff adds/changes user-facing copy, locale keys exist in all active locales (or fail → `locale-translator`)
 
 ## Flake and evidence rules
 
