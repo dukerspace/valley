@@ -59,7 +59,7 @@ valley add ai stripe --no-install
 ## สิ่งที่ scaffolding ทำ (`new`)
 
 1. คัดลอก `templates/valley` ไปที่ `./<name>` (ข้าม `node_modules`, แคชบิลด์, ไฟล์ `.env` ยกเว้น `.env.example`)
-2. คัดลอกแพ็กเกจจาก `packages/` และ playbook ของ CLI (`.agents`, `.skills`, `.cursor/rules`)
+2. คัดลอกแพ็กเกจจาก `templates/valley/packages/` และ playbook ของ CLI (`.agents`, `.skills`, `.cursor/rules`)
 3. ใช้การเลือกแพ็กเกจเสริม
 4. เปลี่ยนสโคป `@valley` เป็น `@<name>`
 5. (ถ้าเปิด) `git init` และ `bun install`

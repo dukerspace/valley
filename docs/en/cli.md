@@ -59,7 +59,7 @@ For each package, the CLI copies from the valley package sources, renames `@vall
 ## What scaffolding does (`new`)
 
 1. Copy `templates/valley` into `./<name>` (skips `node_modules`, build caches, `.env` files except `.env.example`).
-2. Copy shared packages from repo-root `packages/` and CLI playbooks (`.agents`, `.skills`, `.cursor/rules`).
+2. Copy shared packages from `templates/valley/packages/` and CLI playbooks (`.agents`, `.skills`, `.cursor/rules`).
 3. Apply optional package selection.
 4. Rename the `@valley` scope to `@<name>`.
 5. Optionally `git init` and `bun install`.

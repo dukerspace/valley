@@ -2,7 +2,7 @@
 
 แอปที่สร้างได้เป็น Bun + Turbo monorepo
 
-ในรีโป valley CLI แอปอยู่ใน `templates/valley/` แพ็กเกจอยู่ที่ `packages/` และ playbook ของเอเจนต์อยู่ที่ `.agents` / `.skills` / `.cursor/rules` — คำสั่ง `valley new` จะรวมทั้งหมดเข้าโปรเจกต์ใหม่
+ในรีโป valley CLI แอปและแพ็กเกจอยู่ที่ `templates/valley/` (`apps/`, `packages/`) และ playbook ของเอเจนต์อยู่ที่ `.agents` / `.skills` / `.cursor/rules` — คำสั่ง `valley new` จะรวมทั้งหมดเข้าโปรเจกต์ใหม่ มี symlink `packages` ที่รากของรีโปชี้ไปที่ `templates/valley/packages` เพื่อความสะดวก
 
 ## แผนที่เวิร์กสเปซ
 

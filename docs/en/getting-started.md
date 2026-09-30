@@ -15,7 +15,7 @@ npx valley-cli new my-app
 bunx valley-cli new my-app
 ```
 
-That merges `templates/valley` (apps and config) with shared packages from repo-root `packages/` and CLI playbooks (`.agents`, `.skills`, `.cursor/rules`) into `./my-app`, then runs `git init` and `bun install`.
+That merges `templates/valley` (apps, config, and `packages/`) with CLI playbooks (`.agents`, `.skills`, `.cursor/rules`) into `./my-app`, then runs `git init` and `bun install`.
 
 The project name must be a lowercase npm slug (for example `my-app`).
 

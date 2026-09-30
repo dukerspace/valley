@@ -15,7 +15,7 @@ npx valley-cli new my-app
 bunx valley-cli new my-app
 ```
 
-คำสั่งนี้รวม `templates/valley` (แอปและคอนฟิก) กับแพ็กเกจจาก `packages/` และ playbook ของ CLI (`.agents`, `.skills`, `.cursor/rules`) ไปที่ `./my-app` จากนั้นรัน `git init` และ `bun install`
+คำสั่งนี้รวม `templates/valley` (แอป คอนฟิก และ `packages/`) กับ playbook ของ CLI (`.agents`, `.skills`, `.cursor/rules`) ไปที่ `./my-app` จากนั้นรัน `git init` และ `bun install`
 
 ชื่อโปรเจกต์ต้องเป็น npm slug ตัวพิมพ์เล็ก (เช่น `my-app`)
 
