@@ -6,7 +6,7 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "valley": "./src/index.ts"
+    "valley-cli": "./src/index.ts"
   },
   "files": [
     "src",
